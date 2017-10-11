@@ -22,28 +22,35 @@ if M == 64:
 else:
     I = os.urandom(M)
 
-# Step (1)
-# Building a challenge dependent memory
+def memory_build(I,n,P,H):
+    # Step (1)
+    # Building a challenge dependent memory
+        
+    # Step (1.a)
+    for p in range(P):
+        for i in range(n):
+            # TODO: properly turn the int p into a 4 bytes hex string
+            hash_input = str(p) + I
     
-# Step (1.a)
-for p in range(P):
-    for i in range(n):
-        # TODO: properly turn the int p into a 4 bytes hex string
-        hash_input = str(p) + I
+            H.update(hash_input)
+            X[p*l+i] = H.digest()
+    
+    # Step (1.b)
+    for p in range(P):
+        for i in range(n,l):
+            # computing phi_{k}(i) for all k up until n
+            phis_i = phis(i,n)
+    
+            # building the input of the hash function
+            hash_input = ""
+            for phi in phis_i:
+                hash_input += X[p*l+ phi]
+            H.update(hash_input)
+            
+            # inserting the computed hash in the array
+            X[p*l+i] = H.digest()
 
-        H.update(hash_input)
-        X[p*l+i] = H.digest()
+    return X
 
-# Step (1.b)
-for p in range(P):
-    for i in range(n,l):
-        # computing phi_{k}(i) for all k up until n
-        phis_i = phis(i,n)
+print(memory_build(I,n,P,H))
 
-        # building the input of the hash function
-        hash_input = ""
-        for phi in phis_i:
-            hash_input += X[p*l+ phi]
-        H.update(hash_input)
-
-        X[p*l+i] = H.digest()
