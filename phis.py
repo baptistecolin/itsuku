@@ -1,24 +1,22 @@
+import random
 
 bias = 2
 
 # biased random generator
 def phi(i, bias=bias):
-    assert 0 <= i < T
-    if phi_x[i] == -1:
-        # get a possibly biased number in [0,1)
-        u = random.random()
-        if bias == 2:
-            r = 1.0 - u * u
-        elif bias == 1:
-            r = 1.0 - u
-        elif bias == 3:
-            r = 1.0 - u * u * u
-        else: # handle any power...
-            r = 1.0 - pow(u, bias)
-        # compute corresponding index
-        phi_x[i] = int((i - 1) * r)
-        assert 0 <= phi_x[i] and phi_x[i] <= i - (2 if bias == 2 else 1)
-    return phi_x[i]
+    # get a possibly biased number in [0,1)
+    u = random.random()
+    if bias == 2:
+        r = 1.0 - u * u
+    elif bias == 1:
+        r = 1.0 - u
+    elif bias == 3:
+        r = 1.0 - u * u * u
+    else: # handle any power...
+        r = 1.0 - pow(u, bias)
+    # compute corresponding index
+    result = int((i - 1) * r)
+    return result
 
 # return a set of needed elements, up to n
 def phis(i, n, bias=bias):

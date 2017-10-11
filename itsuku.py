@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-import phis
+from phis import phis
 from pyblake2 import blake2b
 from hashlib import sha512
 from math import ceil, log
 
-bias = 2 # quadratic bias
 n = 2 # number of dependencies
 T = 2**10 # length of the main array
 x = 64 # size of elements in the main array
@@ -35,3 +34,16 @@ for p in range(P):
         H.update(hash_input)
         X[p*l+i] = H.digest()
 
+# Step (1.b)
+for p in range(P):
+    for i in range(n,l):
+        # computing phi_{k}(i) for all k up until n
+        phis_i = phis(i,n)
+
+        # building the input of the hash function
+        hash_input = ""
+        for phi in phis_i:
+            hash_input += X[p*l+ phi]
+        H.update(hash_input)
+
+        X[p*l+i] = H.digest()
