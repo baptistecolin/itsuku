@@ -6,7 +6,7 @@ from hashlib import sha512
 from math import ceil, log
 
 n = 2 # number of dependencies
-T = 2**10 # length of the main array
+T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
 M = 64 # size of elemets in the Merkel Tree
 L = ceil(3.3*log(T,2)) # length of one search
@@ -114,12 +114,17 @@ def memory_build(I, n, P, M):
 def merkle_tree(I, X, M):
     # Building the Merkle Tree
     # It will be implemented as an array, each element being a node
-    # The ndoe at index i has its left son at index 2i, and its right son at index 2i+1
+    # The node at index i has its left son at index 2*i+1, and its right son at index 2*i+2
     # The array is of length 2T-1, with T being the length of X (full binary tree)
-    # The leaves of the tree are the elements of X. Thus, MT[-T:] == X. 
+    
+    # The leaves of the tree are the elements of X. Thus, MT[-T:] == hash(X). 
     MT = [None]*(2*len(X)-1)
-    MT[-T:] = X
+    MT[-T:] = [ H(M,x) for x in X ] 
 
+    # Building the non-leaf nodes
+    for i in range(len(X)-2,-1,-1): # Decreasing iteration from len(X)-1 to 0, both included
+        MT[i] = H(M, MT[2*i+1] + MT[2*i+2] + I ) #Hash of left son + right son + challenge
+    
     return MT
 
 X = memory_build(I, n, P, M)
