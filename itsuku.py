@@ -9,6 +9,7 @@ n = 2 # number of dependencies
 T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
 M = 64 # size of elemets in the Merkel Tree
+S = 64 # size of elements of Y
 L = ceil(3.3*log(T,2)) # length of one search
 d = 5 # difficulty of the PoW
 P = 1 # number of independent sequences
@@ -16,6 +17,11 @@ l = ceil(T/P) # length of one independent sequence
 
 X = [None]*T # memory
 HASH = sha512() # hash function
+
+if M == 64:
+    I = b'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated M bytes array)
+else:
+    I = os.urandom(M)
 
 def phi(seed, i, byte_order='big', method='high-level'):
     # Will only work as expected if the seed is 4 bytes long
@@ -75,11 +81,6 @@ def H(M,x):
 def int_to_4bytes(n):
     return struct.pack('>I', n)
 
-if M == 64:
-    I = b'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated M bytes array)
-else:
-    I = os.urandom(M)
-
 def memory_build(I, n, P, M):
     # Step (1)
     # Building a challenge dependent memory
@@ -127,5 +128,38 @@ def merkle_tree(I, X, M):
     
     return MT
 
+def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
+    # Build array Y of length L+1
+    Y = [None]*(L+1)
+
+    # Initialization
+    Y[0] = H(S, N + PSI)
+    
+    # Building the array
+    i = [None]*L
+    for j in range(1, L+1):
+        i[j-1] = int.from_bytes(Y[j-1], byte_order) % len(X)
+
+        # Surprisingly, there is no XOR operation for bytearrays, so this has to been done this way.
+        # See : https://bugs.python.org/issue19251
+        xor = bytes(x ^ y for x, y in zip(X[i[j-1]], I)) 
+        
+        Y[j] = H(S, Y[j-1] + xor)
+
+    # computing OMEGA
+    if len(Y)%2==1:
+        OMEGA_input = b''.join(Y[:0:-1])
+    else:
+        OMEGA_input = b''.join(Y[::-1])
+    OMEGA = H(S, OMEGA_input)
+
+    return Y, OMEGA
+
+
 X = memory_build(I, n, P, M)
-print(merkle_tree(I, X, M))
+MT = merkle_tree(I, X, M)
+PSI = MT[0]
+N = os.urandom(32)
+
+Y, OMEGA = compute_Y(I, X, L, S, N, PSI)
+
