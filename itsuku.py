@@ -31,6 +31,11 @@ def phi(seed, i, byte_order='big', method='high-level'):
     
     return res
 
+def hash(h,x):
+    # Encapsulate hashing operations such as digest, update ... for better readability
+    h.update(x)
+    return h.digest()
+    
 
 if M == 64:
     I = 'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated m bytes array)
@@ -67,5 +72,5 @@ def memory_build(I, n, P, H):
 
     return X
 
-#  print(memory_build(I, n, P, H))
+print(memory_build(I, n, P, H))
 
