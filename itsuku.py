@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import struct
 from phis import phis
 from hashlib import sha512
 from math import ceil, log
@@ -31,14 +32,17 @@ def phi(seed, i, byte_order='big', method='high-level'):
     
     return res
 
-def hash(h,x):
+def hash_function(h,x):
     # Encapsulate hashing operations such as digest, update ... for better readability
     h.update(x)
     return h.digest()
-    
+
+# Turns the int 1024 to the byte string b'\x00\x00\x04\x00', that is fit for hashing
+def int_to_4bytes(n):
+    return struct.pack('>I', n)
 
 if M == 64:
-    I = 'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated m bytes array)
+    I = b'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated m bytes array)
 else:
     I = os.urandom(M)
 
@@ -49,11 +53,9 @@ def memory_build(I, n, P, H):
     # Step (1.a)
     for p in range(P):
         for i in range(n):
-            # TODO: properly turn the int p into a 4 bytes hex string
-            hash_input = str(p) + I
+            hash_input = int_to_4bytes(p) + I
     
-            H.update(hash_input.encode('utf8'))
-            X[p*l+i] = H.digest()
+            X[p*l+i] = hash_function(H,hash_input)
     
     # Step (1.b)
     for p in range(P):
@@ -65,10 +67,9 @@ def memory_build(I, n, P, H):
             hash_input = b""
             for phi in phis_i:
                 hash_input += X[p*l+ phi]
-            H.update(hash_input)
             
             # inserting the computed hash in the array
-            X[p*l+i] = H.digest()
+            X[p*l+i] = hash_function(H,hash_input)
 
     return X
 
