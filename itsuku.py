@@ -42,7 +42,7 @@ def int_to_4bytes(n):
     return struct.pack('>I', n)
 
 if M == 64:
-    I = b'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated m bytes array)
+    I = b'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated M bytes array)
 else:
     I = os.urandom(M)
 
@@ -73,5 +73,16 @@ def memory_build(I, n, P, H):
 
     return X
 
-print(memory_build(I, n, P, H))
 
+def merkle_tree(I, X, H):
+    # Building the Merkle Tree
+    # It will be implemented as an array, each element being a node
+    # The ndoe at index i has its left son at index 2i, and its right son at index 2i+1
+    # The array is of length 2T-1, with T being the length of X (full binary tree)
+    # The leaves of the tree are the elements of X. Thus, MT[-T:] == X. 
+    MT = [None]*(2*len(X)-1)
+    MT[-T:] = X
+    return MT
+
+X = memory_build(I, n, P, H)
+print(merkle_tree(I, X, H))
