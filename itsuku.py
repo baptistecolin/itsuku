@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from phis import phis
@@ -17,22 +17,19 @@ l = ceil(T/P) # length of one independent sequence
 X = [None]*T # memory
 H = sha512() # hash function
 
-def phi(seed, i ,byte_order='big'):
+def phi(seed, i, byte_order='big', method='high-level'):
     J = int.from_bytes(seed, byte_order)
     R = i-1
     
-    print(J)
-
-    res = R*(1-((J*J)/(2**64)))
-
-    # We are using the operations suggested at page 7 in https://www.cryptolux.org/images/0/0d/Argon2.pdf
-    #  x = (J**2)/(2**32)
-    #  y = ((i-1)*x)/(2**32)
-    #  z = (i-1) - 1 - y
+    if method=='high-level':
+        res = R*(1-((J*J)/(2**64)))
+    else:
+        # We are using the operations suggested at page 7 in https://www.cryptolux.org/images/0/0d/Argon2.pdf
+        x = (J**2)/(2**32)
+        y = ((i-1)*x)/(2**32)
+        res = (i-1) - 1 - y
     
     return res
-
-print(phi(os.urandom(32), 5))
 
 
 if M == 64:
