@@ -11,11 +11,10 @@ x = 64 # size of elements in the main array
 M = 64 # size of elemets in the Merkel Tree
 S = 64 # size of elements of Y
 L = ceil(3.3*log(T,2)) # length of one search
-d = 5 # difficulty of the PoW
+d = 1 # difficulty of the PoW
 P = 1 # number of independent sequences
 l = ceil(T/P) # length of one independent sequence
 
-X = [None]*T # memory
 HASH = sha512() # hash function
 
 if M == 64:
@@ -81,10 +80,11 @@ def H(M,x):
 def int_to_4bytes(n):
     return struct.pack('>I', n)
 
-def memory_build(I, n, P, M):
+def memory_build(I, T, n, P, M):
     # Step (1)
     # Building a challenge dependent memory
-        
+    X = [None]*T
+
     # Step (1.a)
     for p in range(P):
         for i in range(n):
@@ -155,11 +155,34 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
 
     return Y, OMEGA
 
+def opening():
+    # TODO : write something in there
+    return None
 
-X = memory_build(I, n, P, M)
-MT = merkle_tree(I, X, M)
-PSI = MT[0]
-N = os.urandom(32)
 
-Y, OMEGA = compute_Y(I, X, L, S, N, PSI)
+def PoW(I, T, n, P, M, L, S, d):
+    X = memory_build(I, T, n, P, M)
+    MT = merkle_tree(I, X, M)
+    
+    PSI = MT[0]
+    
+    # Choosing a nonce
+    N = os.urandom(32)
+   
 
+    Y, OMEGA = compute_Y(I, X, L, S, N, PSI)
+    counter = 0
+    while OMEGA[-d:] != b'\x00'*d : # Testing if there are d trailing zeros
+        Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
+
+        counter += 1
+        if counter % 25 == 0:
+            print("attempt n°"+str(counter))
+
+    print("success on attempt #" + str(counter))
+
+    # TODO : build opening of the Merkle Tree
+
+    return N, Y
+
+print(PoW(I,T,n,P,M,L,S,d))
