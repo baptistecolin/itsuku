@@ -48,3 +48,33 @@ def openingForOneArray(T, leaves):
 print(openingForOneArray(8, [0, 2, 4, 6]))
 print(openingForOneArray(8, [0, 7]))
 print(openingForOneArray(8, [0]))
+
+def opening_2(T, leaves):
+    res = []
+    from math import log2
+    height = int(log2(T)) + 1
+    currentHeight = height - 2
+    numberOfNodes = T
+    nodes = sorted(leaves)
+    while currentHeight >= 0:
+        numberOfNodes /= 2
+        nodeIndex = 0
+        parentNodes = []
+        while nodeIndex < len(nodes):
+            parentNodes.append(int(nodes[nodeIndex] / 2))
+            if nodes[nodeIndex] % 2 == 0:
+                if nodeIndex + 1 < len(nodes) and nodes[nodeIndex + 1] == nodes[nodeIndex] + 1:
+                    nodeIndex += 2
+                else:
+                    res.append((currentHeight + 1, nodes[nodeIndex] + 1))
+                    nodeIndex += 1
+            else:
+                res.append((currentHeight + 1, nodes[nodeIndex] - 1))
+                nodeIndex += 1
+        currentHeight -= 1
+        nodes = parentNodes.copy()
+    return res
+
+print(opening_2(8, [0, 2, 4, 6]) == opening(8, [0, 2, 4, 6]))
+print(opening_2(8, [0, 7]) == opening(8, [0, 7]))
+print(opening_2(8, [0]) == opening(8, [0]))
