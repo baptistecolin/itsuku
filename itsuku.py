@@ -76,8 +76,9 @@ def H(M,x):
     output = HASH.digest()
     return output[:M]
 
-# Turns the int 1024 to the byte string b'\x00\x00\x04\x00', that is fit for hashing
+# Turns the int 1024 into the byte string b'\x00\x00\x04\x00', that is fit for hashing
 def int_to_4bytes(n):
+    print(struct.pack('>I', n))
     return struct.pack('>I', n)
 
 def memory_build(I, T, n, P, M):

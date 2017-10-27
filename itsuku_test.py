@@ -1,8 +1,20 @@
-import itsuku
+from itsuku import *
+import pytest
 
 def test_phi():
-    # TODO : write test
-    return None
+    # shoud fail if the seed is not 4 bytes long
+    seed = int_to_4bytes(123)
+    seed_3bytes = seed[:3]
+    seed_8bytes = seed+seed
+
+    assert len(seed_3bytes) == 3
+    assert len(seed_8bytes) == 8
+
+    with pytest.raises(AssertionError):
+        phi(seed_3bytes, 4)
+    with pytest.raises(AssertionError):
+        phi(seed_5bytes, 4)
+
 
 def test_phis():
     # TODO : write test
