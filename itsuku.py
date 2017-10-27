@@ -35,7 +35,7 @@ def phi(seed, i, byte_order='big', method='high-level'):
         # We are using the operations suggested at page 7 in https://www.cryptolux.org/images/0/0d/Argon2.pdf
         x = (J**2)//(2**32)
         y = ((i-1)*x)//(2**32)
-        res = (i-1) - 1 - y
+        res = i - 1 - y
     
     return res
 

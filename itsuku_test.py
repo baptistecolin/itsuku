@@ -2,7 +2,7 @@ from itsuku import *
 import pytest
 
 def test_phi():
-    # shoud fail if the seed is not 4 bytes long
+    # it shoud fail if the seed is not 4 bytes long
     seed = int_to_4bytes(123)
     seed_3bytes = seed[:3]
     seed_8bytes = seed+seed
@@ -15,6 +15,10 @@ def test_phi():
     with pytest.raises(AssertionError):
         phi(seed_8bytes, 4)
 
+    # it should return the same result using the high-level or low level algorithm
+    assert phi(seed, 4, method='high-level') == phi(seed, 4, method='low-level')
+    assert phi(seed, 28, method='high-level') == phi(seed, 28, method='low-level')
+    assert phi(seed, 1024, method='high-level') == phi(seed, 1024, method='low-level')
 
 
 def test_phis():
