@@ -59,23 +59,27 @@ def test_int_to_4bytes():
     assert int_to_4bytes(16) == b"\x00\x00\x00\x10"
     assert int_to_4bytes(256) == b"\x00\x00\x01\x00"
 
-
+@pytest.mark.skip(reason="to be filled")
 def test_memory_build():
     # TODO : write test
     return None
 
+@pytest.mark.skip(reason="to be filled")
 def test_merkle_tree():
     # TODO : write test
     return None
 
+@pytest.mark.skip(reason="to be filled")
 def test_compute_Y():
     # TODO : write test
     return None
 
+@pytest.mark.skip(reason="to be filled")
 def test_opening():
     # TODO : write test
     return None
 
+@pytest.mark.skip(reason="to be filled")
 def test_PoW():
     # TODO : write test
     return None
