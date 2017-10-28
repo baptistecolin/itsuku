@@ -36,18 +36,10 @@ def opening(T, leaves):
         currentNode = 0
     return res
 
-print(opening(8, [0, 2, 4, 6]))
-print(opening(8, [0, 7]))
-print(opening(8, [0]))
-
 # with the same arguments, returns the list of the indexes to provide with the leaves if the Merkle Tree is stored as in the 'merkle_tree' function
 def openingForOneArray(T, leaves):
     nodes = opening(T, leaves)
     return list(map(lambda node : 2 ** node[0] - 1 + node[1], nodes))
-
-print(openingForOneArray(8, [0, 2, 4, 6]))
-print(openingForOneArray(8, [0, 7]))
-print(openingForOneArray(8, [0]))
 
 def opening_2(T, leaves):
     res = []
@@ -74,7 +66,3 @@ def opening_2(T, leaves):
         currentHeight -= 1
         nodes = parentNodes.copy()
     return res
-
-print(opening_2(8, [0, 2, 4, 6]) == opening(8, [0, 2, 4, 6]))
-print(opening_2(8, [0, 7]) == opening(8, [0, 7]))
-print(opening_2(8, [0]) == opening(8, [0]))

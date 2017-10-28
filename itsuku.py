@@ -183,5 +183,3 @@ def PoW(I, T, n, P, M, L, S, d):
     # TODO : build opening of the Merkle Tree
 
     return N, Y
-
-print(PoW(I,T,n,P,M,L,S,d))
