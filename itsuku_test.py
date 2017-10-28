@@ -20,6 +20,12 @@ def test_phi():
     assert phi(seed, 28, method='high-level') == phi(seed, 28, method='low-level')
     assert phi(seed, 1024, method='high-level') == phi(seed, 1024, method='low-level')
 
+    # it should return a value phi(i) inferior to i
+    assert phi(seed, 2) < 2
+    assert phi(seed, 4) < 4
+    assert phi(seed, 256) < 256
+    assert phi(seed, 1024) < 1024
+
 
 def test_phis():
     # TODO : write test
