@@ -1,5 +1,6 @@
 from itsuku import *
 import pytest
+from hashlib import sha512
 
 def test_phi():
     # it shoud fail if the seed is not 4 bytes long
@@ -37,8 +38,10 @@ def test_phis():
     # TODO : more tests, probably
 
 def test_H():
-    # TODO : write test
-    return None
+    # it should return a bytes array of length M
+    x = int_to_4bytes(123456)
+    for i in range(1,15):
+        assert len(H(i,x)) == i
 
 def test_int_to_4bytes():
     # it should always return a 4 bytes string
