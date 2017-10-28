@@ -28,8 +28,13 @@ def test_phi():
 
 
 def test_phis():
-    # TODO : write test
-    return None
+    seed = int_to_4bytes(256)
+
+    # it should output an array of length n
+    for n in range(1,12):
+        assert len(phis(seed, 10, n)) == n
+
+    # TODO : more tests, probably
 
 def test_H():
     # TODO : write test

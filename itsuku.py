@@ -66,7 +66,6 @@ def phis(seed,i,n):
                                         res.append(phi_i * 7 // 8)
                                         if n>=11:
                                             res.append(i * 7 // 8)
-    assert len(res) == n
     return res
 
 
