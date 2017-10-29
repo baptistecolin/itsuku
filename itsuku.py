@@ -15,7 +15,7 @@ d = 1 # difficulty of the PoW
 P = 1 # number of independent sequences
 l = ceil(T/P) # length of one independent sequence
 
-HASH = sha512() # hash function
+HASH = "sha512" # hash function
 
 if M == 64:
     I = b'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated M bytes array)
@@ -69,11 +69,15 @@ def phis(seed,i,n):
     return res
 
 
-def H(M,x):
+def H(M,x,method=HASH):
     # Encapsulate hashing operations such as digest, update ... for better readability
-    HASH.update(x)
-    output = HASH.digest()
-    return output[:M]
+    
+    if method == "sha512":
+        hashfunc = sha512() # it is important that a new hash function is instanciated every time
+                            # otherwise, the output would depend on the previous inputs ...
+        hashfunc.update(x)
+        output = hashfunc.digest()
+        return output[:M]
 
 # Turns the int 1024 into the byte string b'\x00\x00\x04\x00', that is fit for hashing
 def int_to_4bytes(n):

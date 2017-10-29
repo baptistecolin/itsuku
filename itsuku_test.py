@@ -42,6 +42,15 @@ def test_H():
     x = int_to_4bytes(123456)
     for i in range(1,15):
         assert len(H(i,x)) == i
+    
+    # the H function should output the last M bytes of the sha512 hash of i
+    for i in range(1,15):
+        sha = sha512() # resetting the sha function
+        sha_input = int_to_4bytes(123)
+        sha.update(sha_input)
+        assert sha.digest()[:10] == H(10,sha_input)
+        
+
 
 def test_int_to_4bytes():
     # it should always return a 4 bytes string
