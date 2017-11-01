@@ -133,7 +133,7 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     Y = [None]*(L+1)
 
     # Initialization
-    Y[0] = H(S, N + PSI)
+    Y[0] = H(S, N + PSI + I)
     
     # Building the array
     i = [None]*L

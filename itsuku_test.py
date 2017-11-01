@@ -155,6 +155,8 @@ def test_compute_Y():
 
     # asserting length
     assert len(Y) == L+1
+    # verifying Y[0] is built as expected
+    assert Y[0] == H(S, N + PSI + I)
 
 @pytest.mark.skip(reason="to be filled")
 def test_opening():
