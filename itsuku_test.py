@@ -137,10 +137,24 @@ def test_merkle_tree():
         for j in range((2**i)-1, (2**(i-1))-2):
             assert MT0[i] == value
 
-@pytest.mark.skip(reason="to be filled")
 def test_compute_Y():
-    # TODO : write test
-    return None
+    M = 64
+    T = 2**5
+    n = 2
+    P = 1
+    I = os.urandom(M)
+    l = ceil(T/P)
+    X = memory_build(I, T, n, P, M)
+    MT = merkle_tree(I, X, M)
+    PSI = MT[0]
+    S = 64
+    L = ceil(3.3*log(T,2))
+    N = os.urandom(32) # nounce
+
+    Y, OMEGA = compute_Y(I, X, L, S, N, PSI)
+
+    # asserting length
+    assert len(Y) == L+1
 
 @pytest.mark.skip(reason="to be filled")
 def test_opening():
