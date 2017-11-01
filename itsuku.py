@@ -128,6 +128,10 @@ def merkle_tree(I, X, M):
     
     return MT
 
+def xor(a,b):
+    return bytes(x ^ y for x, y in zip(a,b))
+
+
 def compute_Y(I, X, L, S, N, PSI, byte_order='big', test=False):
     # Build array Y of length L+1
     Y = [None]*(L+1)

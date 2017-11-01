@@ -137,6 +137,12 @@ def test_merkle_tree():
         for j in range((2**i)-1, (2**(i-1))-2):
             assert MT0[i] == value
 
+def test_xor():
+    assert xor(b"\x00", b"\x00") == b"\x00"
+    assert xor(b"\x01", b"\x00") == b"\x01"
+    assert xor(b"\x00", b"\x01") == b"\x01"
+    assert xor(b"\x01", b"\x01") == b"\x00"
+
 def test_compute_Y():
     M = 64
     T = 2**5
@@ -160,10 +166,8 @@ def test_compute_Y():
     assert Y[0] == H(S, N + PSI + I)
     # verifying Y is correctly constructed
     for j in range(1,L+1):
-        xor = bytes(x ^ y for x,y in zip(X[i[j-1]], I))
-
         assert i[j-1] == int.from_bytes(Y[j-1], 'big') % T
-        assert Y[j] == H(S, Y[j-1] + xor)
+        assert Y[j] == H(S, Y[j-1] + xor(X[i[j-1]], I))
 
 @pytest.mark.skip(reason="to be filled")
 def test_opening():
