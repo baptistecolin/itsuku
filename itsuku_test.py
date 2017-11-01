@@ -71,6 +71,7 @@ def test_int_to_4bytes():
 
 def test_memory_build():
     M = 64
+    x = 64
     T = 2**5
     n = 2
     P = 1
@@ -83,7 +84,7 @@ def test_memory_build():
     for p in range(P):
         for i in range(n):
             hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
-            assert X[p*l+i] == H(M, hash_input)
+            assert X[p*l+i] == H(x, hash_input)
 
     # Construction steps
     for p in range(P):
@@ -102,7 +103,7 @@ def test_memory_build():
                 hash_input += X[p*l+phi_k_i]
             
             # asserting the validity of the constructed item
-            assert X[p*l+i] == H(M, hash_input)
+            assert X[p*l+i] == H(x, hash_input)
 
 def test_merkle_tree():
     M = 64
@@ -119,6 +120,10 @@ def test_merkle_tree():
     assert len(MT) == 2*T-1
     # asserting the end of the MT is actually the hashed original array
     assert MT[-T:] == [H(M,x) for x in X]
+    # asserting the constructed items are the hash of their sons
+    for i in range(T-1):
+        assert MT[i] == H(M, MT[2*i+1]+MT[2*i+2]+I)
+
 
 @pytest.mark.skip(reason="to be filled")
 def test_compute_Y():
