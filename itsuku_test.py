@@ -115,7 +115,10 @@ def test_merkle_tree():
     
     MT = merkle_tree(I, X, M)
 
+    # asserting the length is 2*T-1
     assert len(MT) == 2*T-1
+    # asserting the end of the MT is actually the hashed original array
+    assert MT[-T:] == [H(M,x) for x in X]
 
 @pytest.mark.skip(reason="to be filled")
 def test_compute_Y():
