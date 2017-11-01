@@ -90,7 +90,7 @@ def memory_build(I, T, n, P, M):
         for i in range(n):
             hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
     
-            X[p*l+i] = H(M, hash_input)
+            X[p*l+i] = H(x, hash_input)
     
     # Step (1.b)
     for p in range(P):
@@ -107,7 +107,7 @@ def memory_build(I, T, n, P, M):
                 hash_input += X[p*l+ phi]
             
             # inserting the computed hash in the array
-            X[p*l+i] = H(M, hash_input)
+            X[p*l+i] = H(x, hash_input)
 
     return X
 
