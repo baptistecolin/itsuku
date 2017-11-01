@@ -128,7 +128,7 @@ def merkle_tree(I, X, M):
     
     return MT
 
-def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
+def compute_Y(I, X, L, S, N, PSI, byte_order='big', test=False):
     # Build array Y of length L+1
     Y = [None]*(L+1)
 
@@ -152,8 +152,11 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     else:
         OMEGA_input = b''.join(Y[::-1])
     OMEGA = H(S, OMEGA_input)
-
-    return Y, OMEGA
+    
+    if test:
+        return Y, OMEGA, i
+    else:
+        return Y, OMEGA
 
 def opening():
     # TODO : write something in there
