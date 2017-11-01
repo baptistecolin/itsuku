@@ -1,5 +1,6 @@
-from itsuku import *
 import pytest
+import os
+from itsuku import *
 from hashlib import sha512
 
 def test_phi():
@@ -68,10 +69,40 @@ def test_int_to_4bytes():
     assert int_to_4bytes(16) == b"\x00\x00\x00\x10"
     assert int_to_4bytes(256) == b"\x00\x00\x01\x00"
 
-@pytest.mark.skip(reason="to be filled")
 def test_memory_build():
-    # TODO : write test
-    return None
+    M = 64
+    T = 2**5
+    n = 2
+    P = 1
+    I = os.urandom(M)
+    l = ceil(T/P)
+
+    X = memory_build(I, T, n, P, M)
+
+    # Initialization steps
+    for p in range(P):
+        for i in range(n):
+            hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
+            assert X[p*l+i] == H(M, hash_input)
+
+    # Construction steps
+    for p in range(P):
+        for i in range(n,l):
+            seed = X[p*l+i-1][:4] # seed that is used at each step is the 
+                                  # 4 first bytes of the previous array item
+            
+            # asserting that the 0<=phi_k(i)<i condition is actually verified
+            phi_k = phis(seed,i,n)
+            for phi_k_i in phi_k:
+                assert phi_k_i < i
+                assert 0 < phi_k_i
+
+            hash_input = b""
+            for phi_k_i in phi_k:
+                hash_input += X[p*l+phi_k_i]
+            
+            # asserting the validity of the constructed item
+            assert X[p*l+i] == H(M, hash_input)
 
 @pytest.mark.skip(reason="to be filled")
 def test_merkle_tree():

@@ -14,13 +14,10 @@ L = ceil(3.3*log(T,2)) # length of one search
 d = 1 # difficulty of the PoW
 P = 1 # number of independent sequences
 l = ceil(T/P) # length of one independent sequence
+I = os.urandom(M) # initial challenge (randomly generated M bytes array)
 
 HASH = "sha512" # hash function
 
-if M == 64:
-    I = b'N\x8a\xc3\x9c\x83w\x1e\xd4t\xb6\x90\xb0\x10f\xda\xd5F@f"$\x12\x89\x7fN\xf74\x86\xcf^\xf3/\xbc\x14\xea\xc4\x88w\x04\x0bP\xe4\xa8bL\x95Z)\xf8\x9f\x87\t\x14iR,\x0e\x8e\xdc\xd1\xce^\xc3U'  # initial challenge (randomly generated M bytes array)
-else:
-    I = os.urandom(M)
 
 def phi(seed, i, byte_order='big', method='high-level'):
     # Will only work as expected if the seed is 4 bytes long
@@ -91,7 +88,7 @@ def memory_build(I, T, n, P, M):
     # Step (1.a)
     for p in range(P):
         for i in range(n):
-            hash_input = int_to_4bytes(p) + I
+            hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
     
             X[p*l+i] = H(M, hash_input)
     
