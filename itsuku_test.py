@@ -104,10 +104,18 @@ def test_memory_build():
             # asserting the validity of the constructed item
             assert X[p*l+i] == H(M, hash_input)
 
-@pytest.mark.skip(reason="to be filled")
 def test_merkle_tree():
-    # TODO : write test
-    return None
+    M = 64
+    T = 2**5
+    n = 2
+    P = 1
+    I = os.urandom(M)
+    l = ceil(T/P)
+    X = memory_build(I, T, n, P, M)
+    
+    MT = merkle_tree(I, X, M)
+
+    assert len(MT) == 2*T-1
 
 @pytest.mark.skip(reason="to be filled")
 def test_compute_Y():
