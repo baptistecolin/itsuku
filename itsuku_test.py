@@ -123,7 +123,19 @@ def test_merkle_tree():
     # asserting the constructed items are the hash of their sons
     for i in range(T-1):
         assert MT[i] == H(M, MT[2*i+1]+MT[2*i+2]+I)
+    
+    # test on a particular case : if the initial array is constant,
+    # then each "floor" of the merkle tree should be constant
+    X0 = [int_to_4bytes(0)]*T
+    MT0 = merkle_tree(I, X0, M)
 
+    # iterating over the floors
+    for i in range(1,int(log(T,2))):
+        #remembering the value that we expect to find all over the floor
+        value = MT0[(2**i)-1]
+        # iterating inside the floor
+        for j in range((2**i)-1, (2**(i-1))-2):
+            assert MT0[i] == value
 
 @pytest.mark.skip(reason="to be filled")
 def test_compute_Y():
