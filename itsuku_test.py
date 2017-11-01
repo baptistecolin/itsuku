@@ -151,12 +151,19 @@ def test_compute_Y():
     L = ceil(3.3*log(T,2))
     N = os.urandom(32) # nounce
 
-    Y, OMEGA = compute_Y(I, X, L, S, N, PSI)
+    Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI, test=True)
 
     # asserting length
     assert len(Y) == L+1
+    assert len(i) == L
     # verifying Y[0] is built as expected
     assert Y[0] == H(S, N + PSI + I)
+    # verifying Y is correctly constructed
+    for j in range(1,L+1):
+        xor = bytes(x ^ y for x,y in zip(X[i[j-1]], I))
+
+        assert i[j-1] == int.from_bytes(Y[j-1], 'big') % T
+        assert Y[j] == H(S, Y[j-1] + xor)
 
 @pytest.mark.skip(reason="to be filled")
 def test_opening():
