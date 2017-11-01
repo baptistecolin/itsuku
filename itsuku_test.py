@@ -73,37 +73,37 @@ def test_memory_build():
     M = 64
     x = 64
     T = 2**5
-    n = 2
     P = 1
     I = os.urandom(M)
     l = ceil(T/P)
 
-    X = memory_build(I, T, n, P, M)
+    for n in range(2,12): # it should work for different values of n
+        X = memory_build(I, T, n, P, M)
 
-    # Initialization steps
-    for p in range(P):
-        for i in range(n):
-            hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
-            assert X[p*l+i] == H(x, hash_input)
+        # Initialization steps
+        for p in range(P):
+            for i in range(n):
+                hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
+                assert X[p*l+i] == H(x, hash_input)
 
-    # Construction steps
-    for p in range(P):
-        for i in range(n,l):
-            seed = X[p*l+i-1][:4] # seed that is used at each step is the 
-                                  # 4 first bytes of the previous array item
-            
-            # asserting that the 0<=phi_k(i)<i condition is actually verified
-            phi_k = phis(seed,i,n)
-            for phi_k_i in phi_k:
-                assert phi_k_i < i
-                assert 0 < phi_k_i
+        # Construction steps
+        for p in range(P):
+            for i in range(n,l):
+                seed = X[p*l+i-1][:4] # seed that is used at each step is the 
+                                      # 4 first bytes of the previous array item
+                
+                # asserting that the 0<=phi_k(i)<i condition is actually verified
+                phi_k = phis(seed,i,n)
+                for phi_k_i in phi_k:
+                    assert phi_k_i < i
+                    assert 0 < phi_k_i
 
-            hash_input = b""
-            for phi_k_i in phi_k:
-                hash_input += X[p*l+phi_k_i]
-            
-            # asserting the validity of the constructed item
-            assert X[p*l+i] == H(x, hash_input)
+                hash_input = b""
+                for phi_k_i in phi_k:
+                    hash_input += X[p*l+phi_k_i]
+                
+                # asserting the validity of the constructed item
+                assert X[p*l+i] == H(x, hash_input)
 
 def test_merkle_tree():
     M = 64
@@ -112,17 +112,19 @@ def test_merkle_tree():
     P = 1
     I = os.urandom(M)
     l = ceil(T/P)
-    X = memory_build(I, T, n, P, M)
     
-    MT = merkle_tree(I, X, M)
+    for n in range(2,12): # should work for different values of n
+        X = memory_build(I, T, n, P, M)
+        
+        MT = merkle_tree(I, X, M)
 
-    # asserting the length is 2*T-1
-    assert len(MT) == 2*T-1
-    # asserting the end of the MT is actually the hashed original array
-    assert MT[-T:] == [H(M,x) for x in X]
-    # asserting the constructed items are the hash of their sons
-    for i in range(T-1):
-        assert MT[i] == H(M, MT[2*i+1]+MT[2*i+2]+I)
+        # asserting the length is 2*T-1
+        assert len(MT) == 2*T-1
+        # asserting the end of the MT is actually the hashed original array
+        assert MT[-T:] == [H(M,x) for x in X]
+        # asserting the constructed items are the hash of their sons
+        for i in range(T-1):
+            assert MT[i] == H(M, MT[2*i+1]+MT[2*i+2]+I)
     
     # test on a particular case : if the initial array is constant,
     # then each "floor" of the merkle tree should be constant
@@ -146,28 +148,29 @@ def test_xor():
 def test_compute_Y():
     M = 64
     T = 2**5
-    n = 2
     P = 1
-    I = os.urandom(M)
-    l = ceil(T/P)
-    X = memory_build(I, T, n, P, M)
-    MT = merkle_tree(I, X, M)
-    PSI = MT[0]
     S = 64
     L = ceil(3.3*log(T,2))
-    N = os.urandom(32) # nounce
+    I = os.urandom(M)
+    l = ceil(T/P)
+    
+    for n in range(2,12): # should work for different values of n
+        X = memory_build(I, T, n, P, M)
+        MT = merkle_tree(I, X, M)
+        PSI = MT[0]
+        N = os.urandom(32) # nounce
 
-    Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI, test=True)
+        Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI, test=True)
 
-    # asserting length
-    assert len(Y) == L+1
-    assert len(i) == L
-    # verifying Y[0] is built as expected
-    assert Y[0] == H(S, N + PSI + I)
-    # verifying Y is correctly constructed
-    for j in range(1,L+1):
-        assert i[j-1] == int.from_bytes(Y[j-1], 'big') % T
-        assert Y[j] == H(S, Y[j-1] + xor(X[i[j-1]], I))
+        # asserting length
+        assert len(Y) == L+1
+        assert len(i) == L
+        # verifying Y[0] is built as expected
+        assert Y[0] == H(S, N + PSI + I)
+        # verifying Y is correctly constructed
+        for j in range(1,L+1):
+            assert i[j-1] == int.from_bytes(Y[j-1], 'big') % T
+            assert Y[j] == H(S, Y[j-1] + xor(X[i[j-1]], I))
 
 @pytest.mark.skip(reason="to be filled")
 def test_opening():
