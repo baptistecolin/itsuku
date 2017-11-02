@@ -8,12 +8,13 @@ from math import ceil, log
 n = 2 # number of dependencies
 T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
-M = 64 # size of elemets in the Merkel Tree
+M = 4 # size of elements in the Merkel Tree
 S = 64 # size of elements of Y
-L = ceil(3.3*log(T,2)) # length of one search
-d = 1 # difficulty of the PoW
-P = 1 # number of independent sequences
-l = ceil(T/P) # length of one independent sequence
+L = 9 # length of one search
+d = 1 # PoW difficulty (or strength)
+#l = 2**15 # length of segment
+l = 2**5
+P = T/l # number of independent sequences
 I = os.urandom(M) # initial challenge (randomly generated M bytes array)
 
 HASH = "sha512" # hash function
