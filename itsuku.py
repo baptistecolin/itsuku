@@ -161,6 +161,17 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big', test=False):
     else:
         return Y, OMEGA
 
+def trailing_zeros(d, x):
+    # the input is a byte string x
+    # it is converted to an int (big endian convertion)
+    # which is converted to a string, corresponding to the binary representation of the int
+    # the initial '0b' is stripped from the beginning of the string
+    # then we add as much zeros as needed at the beginning of the string for it to be of length d
+    # if the string was already of length d (or greater) then no zero is added
+    # 
+    # in the end, we get a string which is the binary representation of the int that x represents,
+    # in big endian mode, of length at least d, so that it makes sense to extract the last d digits
+    return bin(int.from_bytes(x,'big')).lstrip('-0b').zfill(d)[-d:]=='0'*d
 
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
