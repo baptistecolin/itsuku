@@ -185,7 +185,7 @@ def PoW(I, T, n, P, M, L, S, d):
 
     Y, OMEGA = compute_Y(I, X, L, S, N, PSI)
     counter = 0
-    while OMEGA[-d:] != b'\x00'*d : # Testing if there are d trailing zeros
+    while not(trailing_zeros(d, OMEGA)):
         Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
 
         counter += 1
