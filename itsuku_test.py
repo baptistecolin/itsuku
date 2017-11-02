@@ -172,10 +172,6 @@ def test_compute_Y():
             assert i[j-1] == int.from_bytes(Y[j-1], 'big') % T
             assert Y[j] == H(S, Y[j-1] + xor(X[i[j-1]], I))
 
-@pytest.mark.skip(reason="to be filled")
-def test_opening():
-    # TODO : write test
-    return None
 
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():

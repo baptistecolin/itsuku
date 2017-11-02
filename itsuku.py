@@ -161,10 +161,6 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big', test=False):
     else:
         return Y, OMEGA
 
-def opening():
-    # TODO : write something in there
-    return None
-
 
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
