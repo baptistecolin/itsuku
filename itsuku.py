@@ -135,7 +135,7 @@ def xor(a,b):
     return bytes(x ^ y for x, y in zip(a,b))
 
 
-def compute_Y(I, X, L, S, N, PSI, byte_order='big', test=False):
+def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     # Build array Y of length L+1
     Y = [None]*(L+1)
 
@@ -181,7 +181,7 @@ def PoW(I, T, n, P, M, L, S, d):
     N = os.urandom(32)
    
 
-    Y, OMEGA = compute_Y(I, X, L, S, N, PSI)
+    Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
     counter = 0
     while not(trailing_zeros(d, OMEGA)):
         Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
@@ -191,7 +191,5 @@ def PoW(I, T, n, P, M, L, S, d):
             print("attempt n°"+str(counter))
 
     print("success on attempt #" + str(counter))
-
-    # TODO : build opening of the Merkle Tree
 
     return N, Y
