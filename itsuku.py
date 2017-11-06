@@ -157,10 +157,7 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big', test=False):
         OMEGA_input = b''.join(Y[::-1])
     OMEGA = H(S, OMEGA_input)
     
-    if test:
-        return Y, OMEGA, i
-    else:
-        return Y, OMEGA
+    return Y, OMEGA, i
 
 def trailing_zeros(d, x):
     # the input is a byte string x

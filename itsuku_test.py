@@ -160,7 +160,7 @@ def test_compute_Y():
         PSI = MT[0]
         N = os.urandom(32) # nounce
 
-        Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI, test=True)
+        Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
 
         # asserting length
         assert len(Y) == L+1
