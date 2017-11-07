@@ -183,7 +183,8 @@ def build_L(i, X, l):
         else :
             # i[j] is such that X[i[j]] was built at step 1.b
             seed = X[i[j]-1][:4]
-            res[i[j]] = [ X[k] for k in phis(seed, i[j], n) ]
+            p = i[j] // l
+            res[i[j]] = [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i[j], n) ]
         
     return res
 
