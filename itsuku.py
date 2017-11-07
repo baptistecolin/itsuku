@@ -171,6 +171,22 @@ def trailing_zeros(d, x):
     # in big endian mode, of length at least d, so that it makes sense to extract the last d digits
     return bin(int.from_bytes(x,'big')).lstrip('-0b').zfill(d)[-d:]=='0'*d
 
+def build_L(i, X, l):
+    res = {}
+
+    for j in range(len(i)):
+        
+        if i[j] mod l <= n:
+            # i[j] is such that X[i[j]] was built at step 1.a
+            p = i[j] // l
+            res[i[j]] = X[p:p+n]
+        else :
+            # i[j] is such that X[i[j]] was built at step 1.b
+            seed = X[i[j]-1][:4]
+            res[i[j]] = [ X[k] for k in phis(seed, i[j], n) ]
+        
+    return res
+
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
     MT = merkle_tree(I, X, M)
@@ -191,5 +207,9 @@ def PoW(I, T, n, P, M, L, S, d):
             print("attempt n°"+str(counter))
 
     print("success on attempt #" + str(counter))
+    
+    round_L = build_L(i, X, l)
+
+    # TODO : rest of the protocol
 
     return N, Y
