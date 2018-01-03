@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 #
-# $Id: mtp_hardware.py 1984 2017-10-31 17:58:05Z fabien $
+# $Id: mtp_hardware.py 2046 2017-11-23 15:30:39Z fabien $
 #
 
 import sys
@@ -146,7 +146,7 @@ print("%s on %s (%s): C=%.0f Ndie=%s Nbw=%s N=%.2f throuput=%s (%.1fM)" %
 ## Transposed Search
 ##
 
-imp = 'transposed search'
+imp = 'Transposed search in SRAM'
 
 #CT = C0
 #CTa = C0 * Ha # no threads
@@ -173,6 +173,31 @@ else:
     CT, NTc = 0, 0
 
 imp += " [nps=%d]" % nps
+print("%s on %s (%s): C=%.0f Ndie=%s Nbw=%s N=%.2f throuput=%s (%.1fM)" %
+      (algo, hw, imp,
+       CT, unit(None), unit(None), NTc, unit(NTc * F), NTc * F / M))
+
+
+# alternatively, send many search states from DRAM...
+# which is assume large enough so that we can neglect the array elements
+# tranfers, which are amortized over a large number of searches
+imp = 'Transposed search in DRAM'
+
+# NOTE in & out (& in)
+# NOTE the external DRAM storage is much larger with bs!
+mu = 3 if bs else 2
+# number of searches for which states elements transfered per second
+nTbw = Bw / (mu * (SS + 4))
+# number of cores needed to process the corresponding searches
+nTx = cX * nTbw / F
+# total number of needed cores including other stuff (init)
+CT = ceil(nTx / (cX * L) * C0)
+# production per tick
+NTc = CT / C0
+# check that there is room enough for the hash cores...
+assert CT * Ha <= Ga, "large enough for needed cores"
+print("die usage is %.1f%%" % (100.0 * CT * Ha / Ga))
+
 print("%s on %s (%s): C=%.0f Ndie=%s Nbw=%s N=%.2f throuput=%s (%.1fM)" %
       (algo, hw, imp,
        CT, unit(None), unit(None), NTc, unit(NTc * F), NTc * F / M))
