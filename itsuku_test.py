@@ -179,10 +179,25 @@ def test_trailing_zeros():
     assert trailing_zeros(8, b'\x01\x00') == True
     assert trailing_zeros(2, b'\x08') == True
 
-@pytest.mark.skip(reason="to be filled")
 def test_build_L():
-    # TODO : write test
-    return None
+    M = 64
+    T = 2**5
+    P = 1
+    S = 64
+    L = ceil(3.3*log(T,2))
+    I = os.urandom(M)
+    l = ceil(T/P)
+    
+    for n in range(2,12): # should work for different values of n
+        X = memory_build(I, T, n, P, M)
+        MT = merkle_tree(I, X, M)
+        PSI = MT[0]
+        N = os.urandom(32) # nounce
+        Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+
+        round_L, indexes = build_L(i, X, l)
+        # TODO : add the actual assertions
+        assert 1==0
 
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():
