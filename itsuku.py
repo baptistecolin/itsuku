@@ -176,7 +176,7 @@ def build_L(i, X, l):
 
     for j in range(len(i)):
         
-        if i[j] mod l <= n:
+        if i[j] % l <= n:
             # i[j] is such that X[i[j]] was built at step 1.a
             p = i[j] // l
             res[i[j]] = X[p:p+n]
