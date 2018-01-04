@@ -180,7 +180,7 @@ def test_trailing_zeros():
     assert trailing_zeros(2, b'\x08') == True
 
 @pytest.mark.skip(reason="to be filled")
-def test_build_I():
+def test_build_L():
     # TODO : write test
     return None
 
