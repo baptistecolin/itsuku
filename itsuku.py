@@ -177,13 +177,13 @@ def build_L(i, X, l):
 
     for j in range(len(i)):
         
-        indexes +=i[j] # adds i[j] because the leaf X[i[j]] is always added
+        indexes.append(i[j]) # adds i[j] because the leaf X[i[j]] is always added
 
         if i[j] % l <= n:
             # i[j] is such that X[i[j]] was built at step 1.a
             p = i[j] // l
             res[i[j]] = X[p:p+n]
-            indexes += [p:p+n] 
+            indexes += range(p,p+n) 
         else :
             # i[j] is such that X[i[j]] was built at step 1.b
             seed = X[i[j]-1][:4]
