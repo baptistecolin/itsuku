@@ -171,7 +171,7 @@ def trailing_zeros(d, x):
     # in big endian mode, of length at least d, so that it makes sense to extract the last d digits
     return bin(int.from_bytes(x,'big')).lstrip('-0b').zfill(d)[-d:]=='0'*d
 
-def build_L(i, X, l):
+def build_L(i, X, l, n=n):
     res = {} # will associate each index with the corresponding leaf and antecedent leaves
     indexes = [] # will keep track of all the indexes of all the leaves added to res
 

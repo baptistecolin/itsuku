@@ -195,9 +195,22 @@ def test_build_L():
         N = os.urandom(32) # nounce
         Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
 
-        round_L, indexes = build_L(i, X, l)
-        # TODO : add the actual assertions
-        assert 1==0
+        round_L, indexes = build_L(i, X, l, n)
+        for i_j in i:
+            assert len(round_L[i_j]) == n
+            assert i_j in indexes
+            p = i_j // l
+            if i_j % l <= n:
+                assert round_L[i_j] == X[p:p+n]
+                for x in range(p,p+n):
+                    assert x in indexes
+            else:
+                seed = X[i_j-1][:4]
+                assert round_L[i_j] == [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i_j, n) ]
+                for x in [ p*l + phi_k_i for phi_k_i in phis(seed, i_j, n) ]:
+                    assert x in indexes
+
+        #TODO : assert that indexes is included in all the round_L[...]
 
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():
