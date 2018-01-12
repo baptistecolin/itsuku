@@ -5,7 +5,7 @@ import struct
 from hashlib import sha512
 from math import ceil, log
 
-n = 2 # number of dependencies
+n = 4 # number of dependencies
 T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
 M = 4 # size of elements in the Merkel Tree
@@ -66,6 +66,7 @@ def phis(seed,i,n):
                                             res.append(i * 7 // 8)
     return res
 
+    # TODO : add better phi
 
 def H(M,x,method=HASH):
     # Encapsulate hashing operations such as digest, update ... for better readability
@@ -129,6 +130,8 @@ def merkle_tree(I, X, M):
     
     return MT
 
+    # TODO : add exceptions so it manages to build a merkle tree that has a number of leaves that is not 2^n
+
 # Surprisingly, there is no XOR operation for bytearrays, so this has to been done this way.
 # See : https://bugs.python.org/issue19251
 def xor(a,b):
@@ -189,7 +192,6 @@ def build_L(i, X, l, n=n):
             seed = X[i[j]-1][:4]
             p = i[j] // l
             res[i[j]] = [ (X[p*l + phi_k_i], p*l + phi_k_i) for phi_k_i in phis(seed, i[j], n) ]
-            indexes += [p*l + phi_k_i for phi_k_i in phis(seed, i[j], n) ]
         
     return res
 
