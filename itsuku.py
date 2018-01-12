@@ -188,10 +188,10 @@ def build_L(i, X, l, n=n):
             # i[j] is such that X[i[j]] was built at step 1.b
             seed = X[i[j]-1][:4]
             p = i[j] // l
-            res[i[j]] = [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i[j], n) ]
+            res[i[j]] = [ (X[p*l + phi_k_i], p*l + phi_k_i) for phi_k_i in phis(seed, i[j], n) ]
             indexes += [p*l + phi_k_i for phi_k_i in phis(seed, i[j], n) ]
         
-    return res, indexes
+    return res
 
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
