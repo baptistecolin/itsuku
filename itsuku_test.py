@@ -197,21 +197,14 @@ def test_build_L():
 
         round_L = build_L(i, X, l, n)
         
-        indexes = i
-        for key in round_L:
-            indexes += [ round_L[key][k][1] for k in range(0,len(round_L[key])) ]
-
         for i_j in i:
             assert len(round_L[i_j]) == n
-            assert i_j in indexes
             p = i_j // l
             if i_j % l <= n:
-                assert [ round_L[i_j][k][0] for k in range(0,len(round_L[key])) ] == X[p:p+n]
-                for x in range(p,p+n):
-                    assert x in indexes
+                assert [ round_L[i_j][k] for k in range(0,len(round_L[i_j])) ] == X[p:p+n]
             else:
                 seed = X[i_j-1][:4]
-                assert round_L[i_j] == [ (X[p*l + phi_k_i], p*l + phi_k_i) for phi_k_i in phis(seed, i_j, n) ]
+                assert round_L[i_j] == [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i_j, n) ]
 
         
         #TODO : assert that indexes is included in all the round_L[...]
