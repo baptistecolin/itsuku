@@ -206,6 +206,12 @@ def test_build_L():
                 
                 # by construct, X[i_j] should be part of round_L[i_j]
                 assert X[i_j] in round_L[i_j]
+
+                # assert that the elements of round_L are actually computable
+                for k in range(0,n):
+                    stuff_to_hash = int_to_4bytes(k) + int_to_4bytes(p) + I
+                    assert round_L[i_j][k] == H(M, stuff_to_hash)
+
             else:
                 seed = X[i_j-1][:4]
                 # assert correct construction
@@ -217,7 +223,6 @@ def test_build_L():
                     hash_input += item
                 assert H(M,hash_input) == X[i_j]
         
-
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():
     # TODO : write test
