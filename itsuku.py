@@ -162,17 +162,20 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     
     return Y, OMEGA, i
 
-def trailing_zeros(d, x):
+def leading_zeros(d, x):
     # the input is a byte string x
     # it is converted to an int (big endian convertion)
     # which is converted to a string, corresponding to the binary representation of the int
     # the initial '0b' is stripped from the beginning of the string
-    # then we add as much zeros as needed at the beginning of the string for it to be of length d
-    # if the string was already of length d (or greater) then no zero is added
+    # then we add as much zeros as needed at the beginning of the string for it to be of length 64
+    # if the string was already of length 64 then no zero is added
     # 
     # in the end, we get a string which is the binary representation of the int that x represents,
-    # in big endian mode, of length at least d, so that it makes sense to extract the last d digits
-    return bin(int.from_bytes(x,'big')).lstrip('-0b').zfill(d)[-d:]=='0'*d
+    # in big endian mode, of length 64, so that it makes sense to extract the first d digits with d up to 64
+    #
+    # The 64 limit is due to the fact that the output of a SHA512 hash is of length 64
+    assert d <= 64
+    return bin(int.from_bytes(x,'big')).lstrip('-0b').zfill(64)[:d]=='0'*d
 
 def build_L(i, X, l, n=n):
     round_L = {} # will associate each index with the corresponding leaf and antecedent leaves
@@ -203,7 +206,7 @@ def PoW(I, T, n, P, M, L, S, d):
 
     Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
     counter = 0
-    while not(trailing_zeros(d, OMEGA)):
+    while not(leading_zeros(d, OMEGA)):
         Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
 
         counter += 1
