@@ -175,7 +175,7 @@ def trailing_zeros(d, x):
     return bin(int.from_bytes(x,'big')).lstrip('-0b').zfill(d)[-d:]=='0'*d
 
 def build_L(i, X, l, n=n):
-    res = {} # will associate each index with the corresponding leaf and antecedent leaves
+    round_L = {} # will associate each index with the corresponding leaf and antecedent leaves
     indexes = [] # will keep track of all the indexes of all the leaves added to res
 
     for j in range(len(i)):
@@ -185,15 +185,15 @@ def build_L(i, X, l, n=n):
         if i[j] % l <= n:
             # i[j] is such that X[i[j]] was built at step 1.a
             p = i[j] // l
-            res[i[j]] = X[p:p+n]
+            round_L[i[j]] = X[p:p+n]
             indexes += range(p,p+n) 
         else :
             # i[j] is such that X[i[j]] was built at step 1.b
             seed = X[i[j]-1][:4]
             p = i[j] // l
-            res[i[j]] = [ (X[p*l + phi_k_i], p*l + phi_k_i) for phi_k_i in phis(seed, i[j], n) ]
+            round_L[i[j]] = [ (X[p*l + phi_k_i], p*l + phi_k_i) for phi_k_i in phis(seed, i[j], n) ]
         
-    return res
+    return round_L
 
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
