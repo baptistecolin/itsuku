@@ -179,10 +179,10 @@ def build_L(i, X, l, n=n):
 
     for j in range(len(i)):
         
-        if i[j] % l <= n:
+        if i[j] % l < n:
             # i[j] is such that X[i[j]] was built at step 1.a
             p = i[j] // l
-            round_L[i[j]] = X[p:p+n]
+            round_L[i[j]] = X[p*l:p*l+n]
         else :
             # i[j] is such that X[i[j]] was built at step 1.b
             seed = X[i[j]-1][:4]

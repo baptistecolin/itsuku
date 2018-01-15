@@ -200,12 +200,19 @@ def test_build_L():
         for i_j in i:
             assert len(round_L[i_j]) == n
             p = i_j // l
-            if i_j % l <= n:
-                assert [ round_L[i_j][k] for k in range(0,len(round_L[i_j])) ] == X[p:p+n]
+            if i_j % l < n:
+                assert round_L[i_j] == X[p*l:p*l+n]
+                assert X[i_j] in round_L[i_j]
             else:
                 seed = X[i_j-1][:4]
+                # assert correct construction
                 assert round_L[i_j] == [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i_j, n) ]
 
+                # make sure X[i_j] can be recomputed using the elements of round_L[i_j]
+                hash_input = b""
+                for item in round_L[i_j]:
+                    hash_input += item
+                assert H(M,hash_input) == X[i_j]
         
         #TODO : assert that indexes is included in all the round_L[...]
 
