@@ -201,7 +201,10 @@ def test_build_L():
             assert len(round_L[i_j]) == n
             p = i_j // l
             if i_j % l < n:
+                # assert correct construction
                 assert round_L[i_j] == X[p*l:p*l+n]
+                
+                # by construct, X[i_j] should be part of round_L[i_j]
                 assert X[i_j] in round_L[i_j]
             else:
                 seed = X[i_j-1][:4]
@@ -214,7 +217,6 @@ def test_build_L():
                     hash_input += item
                 assert H(M,hash_input) == X[i_j]
         
-        #TODO : assert that indexes is included in all the round_L[...]
 
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():
