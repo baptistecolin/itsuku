@@ -222,6 +222,10 @@ def provided_indexes(round_L, l=l, n=n):
             # not encapsulate X[i_j]. Whereas it is true that X[i_j] is not witholded
             # by round_L, X[i_j] can be recomputed from the elements of round_L,
             # thus making it an element which can be considered as known if round_L is known
+    
+    # This is intended to remove the likely dupicates
+    # It turns out it is the fastest way to achieve deduplication
+    res = list(dict.fromkeys(res))
 
     return res
 
@@ -247,6 +251,9 @@ def PoW(I, T, n, P, M, L, S, d):
     print("success on attempt #" + str(counter))
     
     round_L = build_L(i, X, l)
+
+    indexes = provided_indexes(round_L, l, n)
+
     
     # TODO : rest of the protocol
 

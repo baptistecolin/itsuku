@@ -269,7 +269,9 @@ def test_provided_indexes():
                 assert seed == X[i_j - 1][:4]
                 for index in [p*l+phi_k_i for phi_k_i in phis(seed, i_j, n)]:
                     assert index in indexes
-                
+            
+        # Asserting there are no duplicates
+        assert len(indexes) == len(set(indexes))
 
 
 @pytest.mark.skip(reason="to be filled")
