@@ -240,6 +240,10 @@ def build_Z(round_L, MT, l=l, n=n):
 
     return Z
 
+def build_JSON_output():
+    # TODO: write it !
+    return None
+
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
     MT = merkle_tree(I, X, M)

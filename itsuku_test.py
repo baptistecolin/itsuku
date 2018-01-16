@@ -304,6 +304,11 @@ def test_build_Z():
 
 
 @pytest.mark.skip(reason="to be filled")
+def test_build_JSON_output():
+    # TODO : write test
+    return None
+
+@pytest.mark.skip(reason="to be filled")
 def test_PoW():
     # TODO : write test
     return None
