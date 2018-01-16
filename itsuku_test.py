@@ -227,7 +227,51 @@ def test_build_L():
                 for item in round_L[i_j]:
                     hash_input += item
                 assert H(M,hash_input) == X[i_j]
-        
+
+def test_provided_indexes():
+    M = 64
+    T = 2**5
+    P = 1
+    S = 64
+    L = ceil(3.3*log(T,2))
+    I = os.urandom(M)
+    l = ceil(T/P)
+    
+    for n in range(2,12): # should work for different values of n
+        X = memory_build(I, T, n, P, M)
+        MT = merkle_tree(I, X, M)
+        PSI = MT[0]
+        N = os.urandom(32) # nounce
+        Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+        round_L = build_L(i, X, l, n)
+
+        indexes = provided_indexes(round_L, l, n)
+
+        for i_j in i:
+            # all the i_j should be in indexes as X[i_j] can alwas be recomputed
+            # using only the elements of round_L[i_j]. Thus, X[i_j] can and must
+            # be considered as a given if round_L is known
+            assert i_j in indexes
+            
+            p = i_j // l
+            
+            if i_j % l < n :
+                # case where the elements of round[i_j] were computed at step (1.a)
+                for k in range(p*l, p*l+n):
+                    assert k in indexes
+            else :
+                # case where the elements of round[i_j] were computed at step (1.b)
+
+                seed = round_L[i_j][0][:4]
+
+                # The seed computed using round_L should be the same seed as the
+                # one used during the construction of X
+                assert seed == X[i_j - 1][:4]
+                for index in [p*l+phi_k_i for phi_k_i in phis(seed, i_j, n)]:
+                    assert index in indexes
+                
+
+
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():
     # TODO : write test

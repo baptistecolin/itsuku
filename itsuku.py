@@ -181,18 +181,49 @@ def build_L(i, X, l, n=n):
     round_L = {} # will associate each index with the corresponding leaf and antecedent leaves
 
     for j in range(len(i)):
+        p = i[j] // l
         
         if i[j] % l < n:
             # i[j] is such that X[i[j]] was built at step 1.a
-            p = i[j] // l
             round_L[i[j]] = X[p*l:p*l+n]
         else :
             # i[j] is such that X[i[j]] was built at step 1.b
             seed = X[i[j]-1][:4]
-            p = i[j] // l
             round_L[i[j]] = [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i[j], n) ]
         
     return round_L
+
+
+# Given a round_L object, such as the one that is returned at the end of the Itsuku PoW,
+# this function computes the list of the indexes of all the element 
+# of the corresponding array X that are known and stored in round_L
+#
+# Computing this information turns out to be necessary before computing the opening of a merkle tree.
+
+def provided_indexes(round_L, l=l, n=n):
+    
+    res = list(round_L.keys())
+    
+    for i_j in round_L :
+
+        p = i_j // l
+
+        if i_j % l < n :
+            # Case when round_L[i_j] items have been built at step (1.a)
+            
+            res += range(p*l, p*l+n)
+        else :
+            # Case when round_L[i_j] items have been built at step (1.b)
+            
+            seed = round_L[i_j][0][:4]
+            
+            res += [p*l + phi_k_i for phi_k_i in phis(seed, i_j, n) ] + [i_j]
+            # One may say that adding i_j to the list is wrong because round_L does
+            # not encapsulate X[i_j]. Whereas it is true that X[i_j] is not witholded
+            # by round_L, X[i_j] can be recomputed by from the elements of round_L,
+            # thus making it an element which can be considered as known if round_L is known
+
+    return res
 
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
