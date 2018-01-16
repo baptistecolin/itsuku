@@ -1,7 +1,5 @@
 import pytest
-import os
 from itsuku import *
-from hashlib import sha512
 
 def test_phi():
     # it shoud fail if the seed is not 4 bytes long
