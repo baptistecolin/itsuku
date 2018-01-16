@@ -273,6 +273,37 @@ def test_provided_indexes():
         # Asserting there are no duplicates
         assert len(indexes) == len(set(indexes))
 
+def test_build_Z():
+    M = 64
+    T = 2**5
+    P = 1
+    S = 64
+    L = ceil(3.3*log(T,2))
+    I = os.urandom(M)
+    l = ceil(T/P)
+    
+    for n in range(2,12): # should work for different values of n
+        X = memory_build(I, T, n, P, M)
+        MT = merkle_tree(I, X, M)
+        PSI = MT[0]
+        N = os.urandom(32) # nounce
+        Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+        round_L = build_L(i, X, l, n)
+        
+        # A shift has to be applied so the indexes match those of the
+        # Merkle Tree and not those of X.
+        indexes = [ index + T - 1 for index in  provided_indexes(round_L, l, n)]
+
+        Z = build_Z(round_L, MT, l, n)
+
+        for k in Z:
+            assert k not in indexes
+            assert Z[k] == MT[k]
+            if k >= T-1:
+                assert Z[k] == H( M, X[k-(T-1)] )
+        
+        assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, l, n)))
+
 
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():

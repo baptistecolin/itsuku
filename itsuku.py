@@ -4,6 +4,7 @@ import os
 import struct
 from hashlib import sha512
 from math import ceil, log
+from opening import openingForOneArray as opening
 
 n = 4 # number of dependencies
 T = 2**5 # length of the main array
@@ -229,6 +230,16 @@ def provided_indexes(round_L, l=l, n=n):
 
     return res
 
+def build_Z(round_L, MT, l=l, n=n):
+    
+    indexes = provided_indexes(round_L, l, n)
+    opening_indexes = opening(T, indexes)
+    Z = dict.fromkeys(opening_indexes)
+    for k in Z :
+        Z[k] = MT[k]
+
+    return Z
+
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
     MT = merkle_tree(I, X, M)
@@ -250,10 +261,8 @@ def PoW(I, T, n, P, M, L, S, d):
 
     print("success on attempt #" + str(counter))
     
-    round_L = build_L(i, X, l)
-
-    indexes = provided_indexes(round_L, l, n)
-
+    round_L = build_L(i, X, l, n)
+    Z = build_Z(round_L, MT, l, n)
     
     # TODO : rest of the protocol
 
