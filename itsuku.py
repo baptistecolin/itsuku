@@ -12,7 +12,7 @@ x = 64 # size of elements in the main array
 M = 4 # size of elements in the Merkel Tree
 S = 64 # size of elements of Y
 L = 9 # length of one search
-d = 1 # PoW difficulty (or strength)
+d = b'\x00'*63 + b'\xff' # PoW difficulty (or strength)
 #l = 2**15 # length of segment
 l = 2**5
 P = T/l # number of independent sequences
@@ -163,20 +163,11 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     
     return Y, OMEGA, i
 
-def leading_zeros(d, x):
-    # the input is a byte string x
-    # it is converted to an int (big endian convertion)
-    # which is converted to a string, corresponding to the binary representation of the int
-    # the initial '0b' is stripped from the beginning of the string
-    # then we add as much zeros as needed at the beginning of the string for it to be of length 64
-    # if the string was already of length 64 then no zero is added
-    # 
-    # in the end, we get a string which is the binary representation of the int that x represents,
-    # in big endian mode, of length 64, so that it makes sense to extract the first d digits with d up to 64
-    #
-    # The 64 limit is due to the fact that the output of a SHA512 hash is of length 64
-    assert d <= 64
-    return bin(int.from_bytes(x,'big')).lstrip('-0b').zfill(64)[:d]=='0'*d
+def is_PoW_solved(d, x):
+    assert len(x) == 64
+    assert len(d) == 64
+    # using the lexicographic order
+    return x > d
 
 def build_L(i, X, l, n=n):
     round_L = {} # will associate each index with the corresponding leaf and antecedent leaves
@@ -256,7 +247,7 @@ def PoW(I, T, n, P, M, L, S, d):
 
     Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
     counter = 0
-    while not(leading_zeros(d, OMEGA)):
+    while not(is_PoW_solved(d, OMEGA)):
         Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
 
         counter += 1

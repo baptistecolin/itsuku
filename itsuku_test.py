@@ -170,17 +170,17 @@ def test_compute_Y():
             assert i[j-1] == int.from_bytes(Y[j-1], 'big') % T
             assert Y[j] == H(S, Y[j-1] + xor(X[i[j-1]], I))
 
-def test_leading_zeros():
-    assert leading_zeros(1, b'\x00') == True
-    assert leading_zeros(32, b'\x00') == True
-    assert leading_zeros(1, b'\x01') == True
-    assert leading_zeros(51, b'\x10\x00') == True
-    assert leading_zeros(52, b'\x10\x00') == False
-    assert leading_zeros(2, b'\x08') == True
+def test_is_PoW_solved():
+    assert is_PoW_solved(b'\x00'*64, b'\x00'*63 + b'\x01') == True
+    assert is_PoW_solved(b'\x00'*64, b'\x00'*64) == False
+    assert is_PoW_solved(b'\xff'*63 + b'\xfe', b'\xff'*64) == True
 
     with pytest.raises(AssertionError):
-        leading_zeros(65, b"\x00")
-
+        is_PoW_solved(b'\x00', b'\x00'*64)
+    with pytest.raises(AssertionError):
+        is_PoW_solved(b'\x00', b'\x00')
+    with pytest.raises(AssertionError):
+        is_PoW_solved(b'\x00'*64, b'\x00')
 
 def test_build_L():
     M = 64
