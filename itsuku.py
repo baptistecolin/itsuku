@@ -2,6 +2,7 @@
 
 import os
 import struct
+import json
 from hashlib import sha512
 from math import floor, ceil, log
 from opening import openingForOneArray as opening
@@ -227,9 +228,35 @@ def build_Z(round_L, MT, P, T, n):
 
     return Z
 
-def build_JSON_output():
-    # TODO: write it !
-    return None
+def trim_round_L(round_L, P, T, n):
+    
+    l = P//T
+    assert l == P/T
+
+    # Only keeping elements built a step 1.b, since elements
+    # built at step 1.a can be recomputed knowing only I
+    trimmed_round_L = { k: v for k,v in round_L if k % l >= n }
+
+    return trimmed_round_L
+
+def build_JSON_output(N, round_L, Z, P, T, n):
+    data = {'answer':{}, 'params':{}}
+
+    data['answer']['N'] = N
+    data['answer']['round_L'] = trim_round_L(round_L, P, T, n)
+    data['answer']['Z'] = Z
+    # no need to add i to the data because it can be obtain by extracting the keys of round_L
+
+    data['params']['n'] = n
+    data['params']['P'] = P
+    data['params']['T'] = T
+    data['params']['I'] = I
+    data['params']['M'] = M
+    data['params']['L'] = L
+    data['params']['S'] = S
+    data['params']['d'] = d
+
+    return json.dumps(data, separators=(',',':')))
 
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
