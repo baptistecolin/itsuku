@@ -321,14 +321,15 @@ def test_trim_round_L():
     assert trim_round_L(round_L_4 , 4, 32, 6) == {15:[]}
 
 def test_build_JSON_output():
-    JSON = build_JSON_output(N='N', round_L={}, Z='Z', P=4, T=32, n='n', I='I', M='M', L='L', S='S', d='d')
+    JSON = build_JSON_output(N=b'\x00'*63 + b'\xff', round_L={}, Z='Z', P=4, T=32, n='n', I='I', M='M', L='L', S='S', d=b'\x00'*64)
     
     data = json.loads(JSON)
     
     # It should have store exactly what has been passed, regardless of the type
     # The only restrictions hold for round_L, that has to be a dict, since it
-    # is processed by trim_round_L, and T and P since a division is performed
-    assert data['answer']['N'] == 'N'
+    # is processed by trim_round_L, T and P since a division is performed,
+    # and d that is a byte array that must be converted to an int
+    assert data['answer']['N'] == '00'*63 + 'ff'
     assert data['answer']['round_L'] == {}
     assert data['answer']['Z'] == 'Z'
 
@@ -339,9 +340,34 @@ def test_build_JSON_output():
     assert data['params']['M'] == 'M'
     assert data['params']['L'] == 'L'
     assert data['params']['S'] == 'S'
-    assert data['params']['d'] == 'd'
+    assert data['params']['d'] == '00'*64
 
-@pytest.mark.skip(reason="to be filled")
-def test_PoW():
-    # TODO : write test
-    return None
+def test_PoW(): 
+    M = 64
+    T = 2**5
+    S = 64
+    L = ceil(3.3*log(T,2))
+    I = os.urandom(M)
+    d = b'\x00'*64 # minimal difficulty
+
+    for P in [1,2,4]:
+        l = T//P
+        for n in range(2,min(12,l)): # should work for different values of n 
+            X = memory_build(I, T, n, P, M)
+            MT = merkle_tree(I, X, M)
+            PSI = MT[0]
+            N = os.urandom(32) # nounce
+            Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+            round_L = build_L(i, X, P, n)
+
+            json = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d)
+            data = json.loads(json)
+
+            assert data['params']['P'] == P
+            assert data['params']['T'] == T
+            assert data['params']['n'] == n
+            assert data['params']['I'] == I
+            assert data['params']['M'] == M
+            assert data['params']['L'] == L
+            assert data['params']['S'] == S
+            assert data['params']['d'] == d

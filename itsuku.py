@@ -242,7 +242,7 @@ def trim_round_L(round_L, P, T, n):
 def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
     data = {'answer':{}, 'params':{}}
 
-    data['answer']['N'] = N
+    data['answer']['N'] = N.hex()
     data['answer']['round_L'] = trim_round_L(round_L, P, T, n)
     data['answer']['Z'] = Z
     # no need to add i to the data because it can be obtain by extracting the keys of round_L
@@ -254,7 +254,7 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
     data['params']['M'] = M
     data['params']['L'] = L
     data['params']['S'] = S
-    data['params']['d'] = d
+    data['params']['d'] = d.hex()
 
     return json.dumps(data, separators=(',',':'))
 
@@ -271,6 +271,7 @@ def PoW(I, T, n, P, M, L, S, d):
     Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
     counter = 0
     while not(is_PoW_solved(d, OMEGA)):
+        N = os.urandom(32) # Choosing a new nonce
         Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
 
         counter += 1
@@ -279,9 +280,21 @@ def PoW(I, T, n, P, M, L, S, d):
 
     print("success on attempt #" + str(counter))
     
-    round_L = build_L(i, X, P, T, n)
+    round_L = build_L(i, X, P, n)
     Z = build_Z(round_L, MT, P, T, n)
-    
-    # TODO : rest of the protocol
 
-    return N, Y
+    json = build_JSON_output(
+            N=N,
+            round_L=round_L,
+            Z=Z,
+            P=P,
+            T=T,
+            n=n,
+            I=I,
+            M=M,
+            L=L,
+            S=S,
+            d=d
+        )
+
+    return json
