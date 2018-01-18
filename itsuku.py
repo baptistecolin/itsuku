@@ -205,7 +205,7 @@ def provided_indexes(round_L, P, T, n):
             
             seed = round_L[i_j][0][:4]
             
-            res += [p*l + phi_k_i for phi_k_i in phis(seed, i_j, n) ] + [i_j]
+            res += [p*l + phi_k_i for phi_k_i in phis(seed, i_j % l, n) ] + [i_j]
             # One may say that adding i_j to the list is wrong because round_L does
             # not encapsulate X[i_j]. Whereas it is true that X[i_j] is not witholded
             # by round_L, X[i_j] can be recomputed from the elements of round_L,
