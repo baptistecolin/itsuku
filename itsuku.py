@@ -235,7 +235,7 @@ def trim_round_L(round_L, P, T, n):
 
     # Only keeping elements built a step 1.b, since elements
     # built at step 1.a can be recomputed knowing only I
-    trimmed_round_L = { k: v for k,v in round_L if k % l >= n }
+    trimmed_round_L = { k: v for k,v in round_L.items() if k % l >= n }
 
     return trimmed_round_L
 

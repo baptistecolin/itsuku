@@ -306,10 +306,19 @@ def test_build_Z():
             assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, P, T, n)))
 
 
-@pytest.mark.skip(reason="to be filled")
 def test_trim_round_L():
-    # TODO : write test
-    return None
+    with pytest.raises(AssertionError):
+        trim_round_L({}, 5, 2, 0)
+
+    round_L_1 = {7: [], 15:[]} # should remain unchanged if (P, T, n) = (32, 4, 6)
+    round_L_2 = {5: [], 10:[]} # should be totally trimmed
+    round_L_3 = {6: [], 14:[]} # edge case : should remain unchanged
+    round_L_4 = {5: [], 15:[]} # should be partially modified
+
+    assert trim_round_L(round_L_1 , 32, 4, 6) == round_L_1
+    assert trim_round_L(round_L_2 , 32, 4, 6) == {}
+    assert trim_round_L(round_L_3 , 32, 4, 6) == round_L_3
+    assert trim_round_L(round_L_4 , 32, 4, 6) == {15:[]}
 
 @pytest.mark.skip(reason="to be filled")
 def test_build_JSON_output():
