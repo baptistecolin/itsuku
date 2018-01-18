@@ -3,7 +3,7 @@
 import os
 import struct
 from hashlib import sha512
-from math import ceil, log
+from math import floor, ceil, log
 from opening import openingForOneArray as opening
 
 n = 4 # number of dependencies
@@ -75,7 +75,9 @@ def memory_build(I, T, n, P, M):
     # Step (1)
     # Building a challenge dependent memory
     X = [None]*T
-
+    
+    assert T//P == floor(T/P)
+    l = T//P
     # Step (1.a)
     for p in range(P):
         for i in range(n):

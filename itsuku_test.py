@@ -71,37 +71,37 @@ def test_memory_build():
     M = 64
     x = 64
     T = 2**5
-    P = 1
     I = os.urandom(M)
-    l = ceil(T/P)
 
-    for n in range(2,12): # it should work for different values of n
-        X = memory_build(I, T, n, P, M)
+    for P in [1,2,4]:
+        l = T//P
+        for n in range(2,min(12,l)): # it should work for different values of n. n can't get bigger than l, otherwise the n "seeds" cannot fit in a slice
+            X = memory_build(I, T, n, P, M)
 
-        # Initialization steps
-        for p in range(P):
-            for i in range(n):
-                hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
-                assert X[p*l+i] == H(x, hash_input)
+            # Initialization steps
+            for p in range(P):
+                for i in range(n):
+                    hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
+                    assert X[p*l+i] == H(x, hash_input)
 
-        # Construction steps
-        for p in range(P):
-            for i in range(n,l):
-                seed = X[p*l+i-1][:4] # seed that is used at each step is the 
-                                      # 4 first bytes of the previous array item
-                
-                # asserting that the 0<=phi_k(i)<i condition is actually verified
-                phi_k = phis(seed,i,n)
-                for phi_k_i in phi_k:
-                    assert phi_k_i < i
-                    assert 0 < phi_k_i
+            # Construction steps
+            for p in range(P):
+                for i in range(n,l):
+                    seed = X[p*l+i-1][:4] # seed that is used at each step is the 
+                                          # 4 first bytes of the previous array item
+                    
+                    # asserting that the 0<=phi_k(i)<i condition is actually verified
+                    phi_k = phis(seed,i,n)
+                    for phi_k_i in phi_k:
+                        assert phi_k_i < i
+                        assert 0 < phi_k_i
 
-                hash_input = b""
-                for phi_k_i in phi_k:
-                    hash_input += X[p*l+phi_k_i]
-                
-                # asserting the validity of the constructed item
-                assert X[p*l+i] == H(x, hash_input)
+                    hash_input = b""
+                    for phi_k_i in phi_k:
+                        hash_input += X[p*l+phi_k_i]
+                    
+                    # asserting the validity of the constructed item
+                    assert X[p*l+i] == H(x, hash_input)
 
 def test_merkle_tree():
     M = 64
