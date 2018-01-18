@@ -315,15 +315,31 @@ def test_trim_round_L():
     round_L_3 = {6: [], 14:[]} # edge case : should remain unchanged
     round_L_4 = {5: [], 15:[]} # should be partially modified
 
-    assert trim_round_L(round_L_1 , 32, 4, 6) == round_L_1
-    assert trim_round_L(round_L_2 , 32, 4, 6) == {}
-    assert trim_round_L(round_L_3 , 32, 4, 6) == round_L_3
-    assert trim_round_L(round_L_4 , 32, 4, 6) == {15:[]}
+    assert trim_round_L(round_L_1 , 4, 32, 6) == round_L_1
+    assert trim_round_L(round_L_2 , 4, 32, 6) == {}
+    assert trim_round_L(round_L_3 , 4, 32, 6) == round_L_3
+    assert trim_round_L(round_L_4 , 4, 32, 6) == {15:[]}
 
-@pytest.mark.skip(reason="to be filled")
 def test_build_JSON_output():
-    # TODO : write test
-    return None
+    JSON = build_JSON_output(N='N', round_L={}, Z='Z', P=4, T=32, n='n', I='I', M='M', L='L', S='S', d='d')
+    
+    data = json.loads(JSON)
+    
+    # It should have store exactly what has been passed, regardless of the type
+    # The only restrictions hold for round_L, that has to be a dict, since it
+    # is processed by trim_round_L, and T and P since a division is performed
+    assert data['answer']['N'] == 'N'
+    assert data['answer']['round_L'] == {}
+    assert data['answer']['Z'] == 'Z'
+
+    assert data['params']['P'] == 4
+    assert data['params']['T'] == 32
+    assert data['params']['n'] == 'n'
+    assert data['params']['I'] == 'I'
+    assert data['params']['M'] == 'M'
+    assert data['params']['L'] == 'L'
+    assert data['params']['S'] == 'S'
+    assert data['params']['d'] == 'd'
 
 @pytest.mark.skip(reason="to be filled")
 def test_PoW():

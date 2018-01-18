@@ -230,8 +230,8 @@ def build_Z(round_L, MT, P, T, n):
 
 def trim_round_L(round_L, P, T, n):
     
-    l = P//T
-    assert l == P/T
+    l = T//P
+    assert l == T/P
 
     # Only keeping elements built a step 1.b, since elements
     # built at step 1.a can be recomputed knowing only I
@@ -239,7 +239,7 @@ def trim_round_L(round_L, P, T, n):
 
     return trimmed_round_L
 
-def build_JSON_output(N, round_L, Z, P, T, n):
+def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
     data = {'answer':{}, 'params':{}}
 
     data['answer']['N'] = N
