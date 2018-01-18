@@ -109,7 +109,7 @@ def test_merkle_tree():
     n = 2
     P = 1
     I = os.urandom(M)
-    l = ceil(T/P)
+    l = T//P
     
     for n in range(2,12): # should work for different values of n
         X = memory_build(I, T, n, P, M)
@@ -150,7 +150,7 @@ def test_compute_Y():
     S = 64
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-    l = ceil(T/P)
+    l = T//P
     
     for n in range(2,12): # should work for different values of n
         X = memory_build(I, T, n, P, M)
@@ -189,7 +189,7 @@ def test_build_L():
     S = 64
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-    l = ceil(T/P)
+    l = T//P
     
     for n in range(2,12): # should work for different values of n
         X = memory_build(I, T, n, P, M)
@@ -198,7 +198,7 @@ def test_build_L():
         N = os.urandom(32) # nounce
         Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
 
-        round_L = build_L(i, X, l, n)
+        round_L = build_L(i, X, P, n)
         
         for i_j in i:
             assert len(round_L[i_j]) == n
@@ -233,7 +233,7 @@ def test_provided_indexes():
     S = 64
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-    l = ceil(T/P)
+    l = T//P
     
     for n in range(2,12): # should work for different values of n
         X = memory_build(I, T, n, P, M)
@@ -241,9 +241,9 @@ def test_provided_indexes():
         PSI = MT[0]
         N = os.urandom(32) # nounce
         Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
-        round_L = build_L(i, X, l, n)
+        round_L = build_L(i, X, P, n)
 
-        indexes = provided_indexes(round_L, l, n)
+        indexes = provided_indexes(round_L, P, T, n)
 
         for i_j in i:
             # all the i_j should be in indexes as X[i_j] can alwas be recomputed
@@ -278,7 +278,7 @@ def test_build_Z():
     S = 64
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-    l = ceil(T/P)
+    l = T//P
     
     for n in range(2,12): # should work for different values of n
         X = memory_build(I, T, n, P, M)
@@ -286,13 +286,13 @@ def test_build_Z():
         PSI = MT[0]
         N = os.urandom(32) # nounce
         Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
-        round_L = build_L(i, X, l, n)
+        round_L = build_L(i, X, P, n)
         
         # A shift has to be applied so the indexes match those of the
         # Merkle Tree and not those of X.
-        indexes = [ index + T - 1 for index in  provided_indexes(round_L, l, n)]
+        indexes = [ index + T - 1 for index in  provided_indexes(round_L, P, T, n)]
 
-        Z = build_Z(round_L, MT, l, n)
+        Z = build_Z(round_L, MT, P, T, n)
 
         for k in Z:
             assert k not in indexes
@@ -300,7 +300,7 @@ def test_build_Z():
             if k >= T-1:
                 assert Z[k] == H( M, X[k-(T-1)] )
         
-        assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, l, n)))
+        assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, P, T, n)))
 
 
 @pytest.mark.skip(reason="to be filled")

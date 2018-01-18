@@ -159,8 +159,12 @@ def is_PoW_solved(d, x):
     # using the lexicographic order
     return x > d
 
-def build_L(i, X, l, n=n):
+def build_L(i, X, P, n):
     round_L = {} # will associate each index with the corresponding leaf and antecedent leaves
+    
+    # computing l
+    l = len(X)//P
+    assert l == floor(len(X)//P)
 
     for j in range(len(i)):
         p = i[j] // l
@@ -182,8 +186,10 @@ def build_L(i, X, l, n=n):
 #
 # Computing this information turns out to be necessary before computing the opening of a merkle tree.
 
-def provided_indexes(round_L, l=l, n=n):
-    
+def provided_indexes(round_L, P, T, n):
+    l = T//P
+    assert l == floor(T/P)
+
     res = list(round_L.keys())
     
     for i_j in round_L :
@@ -211,9 +217,9 @@ def provided_indexes(round_L, l=l, n=n):
 
     return res
 
-def build_Z(round_L, MT, l=l, n=n):
-    
-    indexes = provided_indexes(round_L, l, n)
+def build_Z(round_L, MT, P, T, n):
+
+    indexes = provided_indexes(round_L, P, T, n)
     opening_indexes = opening(T, indexes)
     Z = dict.fromkeys(opening_indexes)
     for k in Z :
@@ -246,8 +252,8 @@ def PoW(I, T, n, P, M, L, S, d):
 
     print("success on attempt #" + str(counter))
     
-    round_L = build_L(i, X, l, n)
-    Z = build_Z(round_L, MT, l, n)
+    round_L = build_L(i, X, T, P, n)
+    Z = build_Z(round_L, MT, T, P, n)
     
     # TODO : rest of the protocol
 
