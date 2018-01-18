@@ -38,36 +38,24 @@ def phi(seed, i, byte_order='big', method='high-level'):
     
     return res
 
+PHI_K = [
+    lambda i, pi: i-1,
+    lambda i, pi: pi,
+    lambda i, pi: pi//2,
+    lambda i, pi: (i-1)//2,
+    lambda i, pi: (pi + i)//2,
+    lambda i, pi: (3*pi)//4,
+    lambda i, pi: 3*i//4,
+    lambda i, pi: pi//4,
+    lambda i, pi: i//4,
+    lambda i, pi: pi*7//8,
+    lambda i, pi: i*7//8
+]
+
 def phis(seed,i,n):
     assert n>=1 and n<=11
-    
-    # The ouput is a list of length n, where the k-th element is phi_{k}(i)
-    res = []
-    res.append(i-1) # phi_{0}(i)
-    if n>=2:
-        phi_i = phi(seed,i)
-        res.append(phi_i) # phi_{1}
-        if n>=3:
-            res.append(phi_i // 2)
-            if n>=4:
-                res.append((i - 1) // 2)
-                if n>=5:
-                    res.append((phi_i + i) // 2)
-                    if n>=6:
-                        res.append(3 * phi_i // 4)
-                        if n>=7:
-                            res.append(3 * i // 4)
-                            if n>=8:
-                                res.append(phi_i // 4)
-                                if n>=9:
-                                    res.append(i // 4)
-                                    if n>=10:
-                                        res.append(phi_i * 7 // 8)
-                                        if n>=11:
-                                            res.append(i * 7 // 8)
-    return res
-
-    # TODO : add better phi
+    phi_i = phi(seed, i)
+    return [ phi(i, phi_i) for phi in PHI_K[:n] ]
 
 def H(M,x,method=HASH):
     # Encapsulate hashing operations such as digest, update ... for better readability
