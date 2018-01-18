@@ -252,8 +252,8 @@ def PoW(I, T, n, P, M, L, S, d):
 
     print("success on attempt #" + str(counter))
     
-    round_L = build_L(i, X, T, P, n)
-    Z = build_Z(round_L, MT, T, P, n)
+    round_L = build_L(i, X, P, T, n)
+    Z = build_Z(round_L, MT, P, T, n)
     
     # TODO : rest of the protocol
 
