@@ -256,7 +256,7 @@ def build_JSON_output(N, round_L, Z, P, T, n):
     data['params']['S'] = S
     data['params']['d'] = d
 
-    return json.dumps(data, separators=(',',':')))
+    return json.dumps(data, separators=(',',':'))
 
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
