@@ -266,8 +266,7 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
     return json.dumps(data, separators=(',',':'))
 
 
-# TODO : automate parameters
-def PoW(I, T, n, P, M, L, S, d):
+def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d):
     X = memory_build(I, T, n, P, M)
     MT = merkle_tree(I, X, M)
     
