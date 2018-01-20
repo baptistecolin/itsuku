@@ -10,7 +10,7 @@ from opening import openingForOneArray as opening
 n = 4 # number of dependencies
 T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
-M = 4 # size of elements in the Merkel Tree #TODO : should be 64
+M = 64 # size of elements in the Merkel Tree
 S = 64 # size of elements of Y
 L = 9 # length of one search
 d = b'\x00'*63 + b'\xff' # PoW difficulty (or strength)
