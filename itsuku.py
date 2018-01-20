@@ -10,7 +10,7 @@ from opening import openingForOneArray as opening
 n = 4 # number of dependencies
 T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
-M = 4 # size of elements in the Merkel Tree
+M = 4 # size of elements in the Merkel Tree #TODO : should be 64
 S = 64 # size of elements of Y
 L = 9 # length of one search
 d = b'\x00'*63 + b'\xff' # PoW difficulty (or strength)
@@ -67,6 +67,8 @@ def H(M,x,method=HASH):
         hashfunc.update(x)
         output = hashfunc.digest()
         return output[:M]
+
+# TODO: implement function F
 
 # Turns the int 1024 into the byte string b'\x00\x00\x04\x00', that is fit for hashing
 def int_to_4bytes(n):
@@ -235,7 +237,9 @@ def trim_round_L(round_L, P, T, n):
 
     # Only keeping elements built a step 1.b, since elements
     # built at step 1.a can be recomputed knowing only I
-    trimmed_round_L = { k: v for k,v in round_L.items() if k % l >= n }
+    # Also, converting the bytearray elements of X to a format 
+    # that can be JSON-serialized
+    trimmed_round_L = { k: [item.hex() for item in v] for k,v in round_L.items() if k % l >= n }
 
     return trimmed_round_L
 
@@ -258,6 +262,8 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
 
     return json.dumps(data, separators=(',',':'))
 
+
+# TODO : automate parameters
 def PoW(I, T, n, P, M, L, S, d):
     X = memory_build(I, T, n, P, M)
     MT = merkle_tree(I, X, M)

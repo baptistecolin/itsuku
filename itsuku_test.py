@@ -40,7 +40,7 @@ def test_H():
     # it should return a bytes array of length M
     x = int_to_4bytes(123456)
     for i in range(1,15):
-        assert len(H(i,x)) == i
+        assert len(H(i,x)) == i # TODO : check 0<
     
     # the H function should output the last M bytes of the sha512 hash of i
     for i in range(1,15):
@@ -309,7 +309,8 @@ def test_build_Z():
 def test_trim_round_L():
     with pytest.raises(AssertionError):
         trim_round_L({}, 5, 2, 0)
-
+    
+    # Assert that the intended items are trimmed off of the dict
     round_L_1 = {7: [], 15:[]} # should remain unchanged if (P, T, n) = (32, 4, 6)
     round_L_2 = {5: [], 10:[]} # should be totally trimmed
     round_L_3 = {6: [], 14:[]} # edge case : should remain unchanged
@@ -319,6 +320,10 @@ def test_trim_round_L():
     assert trim_round_L(round_L_2 , 4, 32, 6) == {}
     assert trim_round_L(round_L_3 , 4, 32, 6) == round_L_3
     assert trim_round_L(round_L_4 , 4, 32, 6) == {15:[]}
+
+    # Assert that the bytearrays are properly converted
+    round_L_5 = {7: [b'\x00', b'\xfe', b'\xa4']}
+    assert trim_round_L(round_L_5, 4, 32, 6) == {7: ['00','fe','a4']}
 
 def test_build_JSON_output():
     JSON = build_JSON_output(N=b'\x00'*63 + b'\xff', round_L={}, Z='Z', P=4, T=32, n='n', I='I', M='M', L='L', S='S', d=b'\x00'*64)
