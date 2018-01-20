@@ -230,6 +230,9 @@ def build_Z(round_L, MT, P, T, n):
 
     return Z
 
+def clean_Z(Z):
+    return  { k: v.hex() for k,v in Z.items() }
+
 def trim_round_L(round_L, P, T, n):
     
     l = T//P
@@ -248,13 +251,13 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
 
     data['answer']['N'] = N.hex()
     data['answer']['round_L'] = trim_round_L(round_L, P, T, n)
-    data['answer']['Z'] = Z
+    data['answer']['Z'] = clean_Z(Z)
     # no need to add i to the data because it can be obtain by extracting the keys of round_L
 
     data['params']['n'] = n
     data['params']['P'] = P
     data['params']['T'] = T
-    data['params']['I'] = I
+    data['params']['I'] = I.hex()
     data['params']['M'] = M
     data['params']['L'] = L
     data['params']['S'] = S

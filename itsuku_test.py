@@ -305,6 +305,11 @@ def test_build_Z():
             
             assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, P, T, n)))
 
+def clean_Z():
+    Z = { 5: b'\x00', 8: b'\xfe', 14: b'\xa4' }
+    cleaned_Z = clean_Z(Z)
+    for k in Z:
+        assert cleaned(Z) == Z.hex()
 
 def test_trim_round_L():
     with pytest.raises(AssertionError):
@@ -326,22 +331,18 @@ def test_trim_round_L():
     assert trim_round_L(round_L_5, 4, 32, 6) == {7: ['00','fe','a4']}
 
 def test_build_JSON_output():
-    JSON = build_JSON_output(N=b'\x00'*63 + b'\xff', round_L={}, Z='Z', P=4, T=32, n='n', I='I', M='M', L='L', S='S', d=b'\x00'*64)
+    JSON = build_JSON_output(N=b'\x00'*63 + b'\xff', round_L={}, Z={}, P=4, T=32, n='n', I=b'\xff'*64, M='M', L='L', S='S', d=b'\x00'*64)
     
     data = json.loads(JSON)
     
-    # It should have store exactly what has been passed, regardless of the type
-    # The only restrictions hold for round_L, that has to be a dict, since it
-    # is processed by trim_round_L, T and P since a division is performed,
-    # and d that is a byte array that must be converted to an int
     assert data['answer']['N'] == '00'*63 + 'ff'
     assert data['answer']['round_L'] == {}
-    assert data['answer']['Z'] == 'Z'
+    assert data['answer']['Z'] == {}
 
     assert data['params']['P'] == 4
     assert data['params']['T'] == 32
     assert data['params']['n'] == 'n'
-    assert data['params']['I'] == 'I'
+    assert data['params']['I'] == 'ff'*64
     assert data['params']['M'] == 'M'
     assert data['params']['L'] == 'L'
     assert data['params']['S'] == 'S'
@@ -365,14 +366,14 @@ def test_PoW():
             Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
             round_L = build_L(i, X, P, n)
 
-            json = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d)
-            data = json.loads(json)
+            json_output = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d)
+            data = json.loads(json_output)
 
             assert data['params']['P'] == P
             assert data['params']['T'] == T
             assert data['params']['n'] == n
-            assert data['params']['I'] == I
+            assert data['params']['I'] == I.hex()
             assert data['params']['M'] == M
             assert data['params']['L'] == L
             assert data['params']['S'] == S
-            assert data['params']['d'] == d
+            assert data['params']['d'] == d.hex()
