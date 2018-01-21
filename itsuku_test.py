@@ -380,5 +380,16 @@ def test_PoW():
             # Preparing round_L
             round_L = {}
             for k in unprocessed_round_L:
-                round_L[int(k)+T] = [ int(x, 16).to_bytes(64, 'big') for x in unprocessed_round_L[k] ]
+                round_L[int(k)+T-1] = [ int(x, 16).to_bytes(64, 'big') for x in unprocessed_round_L[k] ]
+            
+            # Preparing Z
+            Z = {}
+            for k in unprocessed_Z:
+                Z[int(k)] = int(unprocessed_Z[k], 16).to_bytes(64, 'big')
 
+            # Verifications
+
+            # TODO : it should be checked that all *antecedents* are not in Z
+            for k in round_L:
+                assert k>=T
+                assert k not in Z
