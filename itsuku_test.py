@@ -370,4 +370,15 @@ def test_PoW():
             assert data['params']['L'] == L
             assert data['params']['S'] == S
             assert data['params']['d'] == d.hex()
+            
+            # Verifying the answer
+            
+            N = data['answer']['N']
+            unprocessed_Z = data['answer']['Z']
+            unprocessed_round_L = data['answer']['round_L']
+            
+            # Preparing round_L
+            round_L = {}
+            for k in unprocessed_round_L:
+                round_L[int(k)+T] = [ int(x, 16).to_bytes(64, 'big') for x in unprocessed_round_L[k] ]
 
