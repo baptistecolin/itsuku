@@ -291,11 +291,11 @@ def test_build_Z():
             Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
             round_L = build_L(i, X, P, n)
             
+            Z = build_Z(round_L, MT, P, T, n)
+
             # A shift has to be applied so the indexes match those of the
             # Merkle Tree and not those of X.
             indexes = [ index + T - 1 for index in  provided_indexes(round_L, P, T, n)]
-
-            Z = build_Z(round_L, MT, P, T, n)
 
             for k in Z:
                 assert k not in indexes
