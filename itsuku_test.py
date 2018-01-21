@@ -359,13 +359,6 @@ def test_PoW():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n 
-            X = memory_build(I, T, n, P, M)
-            MT = merkle_tree(I, X, M)
-            PSI = MT[0]
-            N = os.urandom(32) # nounce
-            Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
-            round_L = build_L(i, X, P, n)
-
             json_output = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d)
             data = json.loads(json_output)
 
@@ -377,3 +370,4 @@ def test_PoW():
             assert data['params']['L'] == L
             assert data['params']['S'] == S
             assert data['params']['d'] == d.hex()
+
