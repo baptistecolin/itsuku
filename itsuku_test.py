@@ -370,7 +370,7 @@ def test_PoW():
             assert data['params']['L'] == L
             assert data['params']['S'] == S
             assert data['params']['d'] == d.hex()
-            
+           
             # Verifying the answer
             
             N = data['answer']['N']
@@ -409,3 +409,19 @@ def test_PoW():
                 for k, x in enumerate(round_L[i_j]):
                    X[p*l + phi_i[k]] = x
 
+            # Building all elements that were built at step 1.a
+            for p in range(P):
+                for i in range(n):
+                    X[p*l + i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
+            
+            # TODO : function that computes OMEGA using the partial X and Z
+            
+            # We can now use the previous functions to compute i and OMEGA
+            Y, OMEGA, computed_i = compute_Y(I, X, L, S, N, PSI)
+            
+            # Verifying the two conditions that define the success of the PoW :
+            #
+            # 1. OMEGA satisfies the difficulty constraint
+            assert is_PoW_solved(d, OMEGA) == True
+            # 2. The keys of round_L correspond the i that has been computed by compute_Y
+            assert computed_i == list(round_L.keys())
