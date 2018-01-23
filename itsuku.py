@@ -126,6 +126,23 @@ def merkle_tree(I, X, M):
 
     # TODO : add exceptions so it manages to build a merkle tree that has a number of leaves that is not 2^n
 
+# Let's use a recursive function !
+# T = number of leaves of the MT
+# known_nodes = dictionnary { i: b } of known nodes of the MT
+#               where 0 <= i < 2T-1 is the index of the node in the array representation of the tree
+#               and b is the hash stored in the corresponding node
+# index = index in the array representation of the MT of the hash we want to compute
+def compute_merkle_tree_node(index, known_nodes, T, M):
+    if index >= 2*T-1:
+        assert index == max(known_nodes)
+    elif index in known_nodes:
+        return known_nodes[index]
+    else:
+        return H(M, 
+                compute_merkle_tree_node(2*index+1, known_nodes, T, M) +
+                compute_merkle_tree_node(2*index+2, known_nodes, T, M) )
+           
+
 # Surprisingly, there is no XOR operation for bytearrays, so this has to been done this way.
 # See : https://bugs.python.org/issue19251
 def xor(a,b):
@@ -214,7 +231,7 @@ def provided_indexes(round_L, P, T, n):
             # by round_L, X[i_j] can be recomputed from the elements of round_L,
             # thus making it an element which can be considered as known if round_L is known
     
-    # This is intended to remove the likely dupicates
+    # This is intended to remove the likely duplicates
     # It turns out it is the fastest way to achieve deduplication
     res = list(dict.fromkeys(res))
 

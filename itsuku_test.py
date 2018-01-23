@@ -136,6 +136,11 @@ def test_merkle_tree():
             # iterating inside the floor
             for j in range((2**i)-1, (2**(i-1))-2):
                 assert MT0[i] == value
+
+@pytest.mark.skip(reason="to be filled"):
+def test_compute_merkle_tree_node():
+    # TODO: write it
+    return None
     
 def test_xor():
     assert xor(b"\x00", b"\x00") == b"\x00"
