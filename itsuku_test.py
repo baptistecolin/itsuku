@@ -380,7 +380,7 @@ def test_PoW():
             # Preparing round_L
             round_L = {}
             for k in unprocessed_round_L:
-                round_L[int(k)+T-1] = [ int(x, 16).to_bytes(64, 'big') for x in unprocessed_round_L[k] ]
+                round_L[int(k)] = [ int(x, 16).to_bytes(64, 'big') for x in unprocessed_round_L[k] ]
             
             # Preparing Z
             Z = {}
@@ -389,5 +389,23 @@ def test_PoW():
 
             # Verifications
             for k in round_L:
-                assert k>=T
-                assert k not in Z
+                assert k+(T-1)>=T
+                assert k+(T-1) not in Z
+
+            # Building back X
+            X = [None]*T
+            for i_j in round_L:
+                p = i_j//l
+
+                # Building X[i_j]
+                hash_input = b''
+                for x in round_L[i_j]:
+                    hash_input += x
+                X[i_j] = H(M, hash_input)
+
+                # Building its antecedents
+                seed = round_L[i_j][0][:4]
+                phi_i = phis(seed, i_j%l, n)
+                for k, x in enumerate(round_L[i_j]):
+                   X[p*l + phi_i[k]] = x
+
