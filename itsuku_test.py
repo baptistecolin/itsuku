@@ -413,8 +413,13 @@ def test_PoW():
             for p in range(P):
                 for i in range(n):
                     X[p*l + i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
-            
-            # TODO : function that computes OMEGA using the partial X and Z
+
+            # Let's build a dict of all the nodes we know, that satisfies the requirement of compute_merkle_tree_node
+            known_nodes = {**Z, **{ k + (T-1) : v for k,v in round_L.items() } }
+            # Verifications
+            assert len(known_nodes) == len(Z) + len(round_L)
+
+            OMEGA = compute_merkle_tree_node(0, known_nodes, T, M)
             
             # We can now use the previous functions to compute i and OMEGA
             Y, OMEGA, computed_i = compute_Y(I, X, L, S, N, PSI)
