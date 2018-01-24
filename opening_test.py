@@ -1,4 +1,5 @@
 from opening import *
+from itsuku import compute_merkle_tree_node
 from math import log2
 import pytest
 
@@ -47,7 +48,12 @@ def test_openingForOneArray():
         assert openingForOneArray(T, half_of_leaves) == half_of_leaves_expected_opening
         assert openingForOneArray(T, all_leaves) == all_leaves_expected_opening
         assert openingForOneArray(T, one_leaf) == one_leaf_expected_opening
-
+        
+        # The opening + the initial leaves should be enough to enable us to compute the merkle tree root
+        # Therefore, the following instructions shouldn't fail
+        for t in [ left_leaves, right_leaves, half_of_leaves, all_leaves, one_leaf ]:
+            known_nodes = {k: b'\x00' for k in t + openingForOneArray(T, t) }
+            compute_merkle_tree_node(0, known_nodes, T, 64)
 
 def test_opening_2():
     # testing on examples that feature different amount of leaves

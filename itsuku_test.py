@@ -137,7 +137,7 @@ def test_merkle_tree():
             for j in range((2**i)-1, (2**(i-1))-2):
                 assert MT0[i] == value
 
-@pytest.mark.skip(reason="to be filled"):
+@pytest.mark.skip(reason="to be filled")
 def test_compute_merkle_tree_node():
     # TODO: write it
     return None
