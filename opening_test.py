@@ -2,6 +2,7 @@ from opening import *
 from itsuku import compute_merkle_tree_node
 from math import log2
 import pytest
+import os
 
 def test_opening():
     # testing on examples that feature different amount of leaves
@@ -53,7 +54,8 @@ def test_openingForOneArray():
         # Therefore, the following instructions shouldn't fail
         for t in [ left_leaves, right_leaves, half_of_leaves, all_leaves, one_leaf ]:
             known_nodes = {k: b'\x00' for k in t + openingForOneArray(T, t) }
-            compute_merkle_tree_node(0, known_nodes, T, 64)
+            I = os.urandom(64)
+            compute_merkle_tree_node(0, known_nodes, I, T, 64)
 
 def test_opening_2():
     # testing on examples that feature different amount of leaves

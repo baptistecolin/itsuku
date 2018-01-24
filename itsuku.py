@@ -132,15 +132,15 @@ def merkle_tree(I, X, M):
 #               where 0 <= i < 2T-1 is the index of the node in the array representation of the tree
 #               and b is the hash stored in the corresponding node
 # index = index in the array representation of the MT of the hash we want to compute
-def compute_merkle_tree_node(index, known_nodes, T, M):
+def compute_merkle_tree_node(index, known_nodes, I, T, M):
     if index >= 2*T-1:
         assert index == max(known_nodes)
     elif index in known_nodes:
         return known_nodes[index]
     else:
         return H(M, 
-                compute_merkle_tree_node(2*index+1, known_nodes, T, M) +
-                compute_merkle_tree_node(2*index+2, known_nodes, T, M) )
+                compute_merkle_tree_node(2*index+1, known_nodes, I, T, M) +
+                compute_merkle_tree_node(2*index+2, known_nodes, I, T, M) + I )
            
 
 # Surprisingly, there is no XOR operation for bytearrays, so this has to been done this way.
