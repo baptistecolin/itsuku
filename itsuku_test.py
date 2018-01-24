@@ -137,11 +137,40 @@ def test_merkle_tree():
             for j in range((2**i)-1, (2**(i-1))-2):
                 assert MT0[i] == value
 
-@pytest.mark.skip(reason="to be filled")
 def test_compute_merkle_tree_node():
-    # TODO: write it
-    return None
+    M = 64
+    I = os.urandom(M)
+
+    # basic examples
+    assert compute_merkle_tree_node(0, {0: b'\x00'*64}, I, 1, M) == b'\x00'*64
+    assert compute_merkle_tree_node(0, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, H(64, b'\x11'*64 + b'\xff'*64 + I) + b'\x00'*64 + I)
+    assert compute_merkle_tree_node(1, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, b'\x11'*64 + b'\xff'*64 + I)
+    assert compute_merkle_tree_node(1, {3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, b'\x11'*64 + b'\xff'*64 + I)
+
+    # should be able to compute anything if all nodes are known
+    T = 2**5
+    n = 2
     
+    for P in [1,2,4]:
+        l = T//P
+        for n in range(2,min(12,l)): # should work for different values of n
+            X = memory_build(I, T, n, P, M)
+            MT = merkle_tree(I, X, M)
+
+            known_nodes = { i:v for i,v in enumerate(MT) }
+
+            for i in range(len(MT)):
+                assert compute_merkle_tree_node(i, known_nodes, I, T, M) == MT[i]
+
+            # Now let's try and remove information while remaining computable
+            for k in range(T-1):
+                known_nodes = { i:v for i,v in enumerate(MT) if i>k}
+                for i in range(k+1):
+                    # the k first elements of the MT have been removed from known_nodes,
+                    # they should be properly computed nonetheless
+                    assert compute_merkle_tree_node(i, known_nodes, I, T, M) == MT[i]
+    
+
 def test_xor():
     assert xor(b"\x00", b"\x00") == b"\x00"
     assert xor(b"\x01", b"\x00") == b"\x01"
@@ -353,6 +382,7 @@ def test_build_JSON_output():
     assert data['params']['S'] == 'S'
     assert data['params']['d'] == '00'*64
 
+@pytest.mark.skip(reason="not good yet")
 def test_PoW(): 
     M = 64
     T = 2**5
