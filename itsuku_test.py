@@ -461,7 +461,7 @@ def test_PoW():
             # Verifications
             assert len(known_nodes) == len(Z) + len(round_L)
 
-            OMEGA = compute_merkle_tree_node(0, known_nodes, T, M)
+            OMEGA = compute_merkle_tree_node(0, known_nodes, I, T, M)
             
             # We can now use the previous functions to compute i and OMEGA
             Y, OMEGA, computed_i = compute_Y(I, X, L, S, N, PSI)
