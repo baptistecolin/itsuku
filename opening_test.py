@@ -3,6 +3,7 @@ from itsuku import compute_merkle_tree_node
 from math import log2
 import pytest
 import os
+import random
 
 def test_opening():
     # testing on examples that feature different amount of leaves
@@ -53,7 +54,27 @@ def test_openingForOneArray():
         # The opening + the initial leaves should be enough to enable us to compute the merkle tree root
         # Therefore, the following instructions shouldn't fail
         for t in [ left_leaves, right_leaves, half_of_leaves, all_leaves, one_leaf ]:
-            known_nodes = {k: b'\x00' for k in t + openingForOneArray(T, t) }
+            known_nodes = {k: b'\x00'*64 for k in [i + (T-1) for i in t] + openingForOneArray(T, t) }
+            I = os.urandom(64)
+            compute_merkle_tree_node(0, known_nodes, I, T, 64)
+
+        # Now we're even going to do it with randomly generated lists of indexes
+        def random_list_of_indexes(T):
+            res = []
+            for index in range(T):
+                if bool(random.getrandbits(1)):
+                    res.append(index)
+
+            return res
+
+        for t in [
+                    random_list_of_indexes(T),
+                    random_list_of_indexes(T),
+                    random_list_of_indexes(T),
+                    random_list_of_indexes(T),
+                    random_list_of_indexes(T)
+                 ]:
+            known_nodes = {k: b'\x00' for k in [i + (T-1) for i in t] + openingForOneArray(T, t) }
             I = os.urandom(64)
             compute_merkle_tree_node(0, known_nodes, I, T, 64)
 
