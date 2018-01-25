@@ -175,9 +175,8 @@ def test_compute_merkle_tree_node():
         assert compute_merkle_tree_node(1, {0: b'\x00'*64}, I, 1, M) == b'\x00'*64
     with pytest.raises(AssertionError):
         assert compute_merkle_tree_node(7, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, H(64, b'\x11'*64 + b'\xff'*64 + I) + b'\x00'*64 + I)
-   
-    
-    assert compute_merkle_tree_node(1, {0: b'\x00'*64}, I, 2, M) == b'\x00'*64
+    with pytest.raises(AssertionError): 
+        assert compute_merkle_tree_node(1, {0: b'\x00'*64}, I, 2, M) == b'\x00'*64
 
 def test_xor():
     assert xor(b"\x00", b"\x00") == b"\x00"
