@@ -133,9 +133,8 @@ def merkle_tree(I, X, M):
 #               and b is the hash stored in the corresponding node
 # index = index in the array representation of the MT of the hash we want to compute
 def compute_merkle_tree_node(index, known_nodes, I, T, M):
-    if index >= 2*T-1:
-        assert index == max(known_nodes)
-    elif index in known_nodes:
+    assert index < 2*T-1 , "Out of bound index : %i" % index
+    if index in known_nodes:
         return known_nodes[index]
     else:
         return H(M, 
