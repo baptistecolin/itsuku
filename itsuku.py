@@ -264,12 +264,12 @@ def trim_round_L(round_L, P, T, n):
 
 def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
     data = {'answer':{}, 'params':{}}
-
+    
     data['answer']['N'] = N.hex()
     data['answer']['round_L'] = trim_round_L(round_L, P, T, n)
     data['answer']['Z'] = clean_Z(Z)
     # no need to add i to the data because it can be obtain by extracting the keys of round_L
-
+    
     data['params']['n'] = n
     data['params']['P'] = P
     data['params']['T'] = T
@@ -306,6 +306,7 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d):
     
     round_L = build_L(i, X, P, n)
     Z = build_Z(round_L, MT, P, T, n)
+    assert len(Z)!=0
 
     json = build_JSON_output(
             N=N,

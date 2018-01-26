@@ -349,8 +349,9 @@ def test_build_Z():
 def clean_Z():
     Z = { 5: b'\x00', 8: b'\xfe', 14: b'\xa4' }
     cleaned_Z = clean_Z(Z)
+    assert len(cleaned_Z) == 3
     for k in Z:
-        assert cleaned(Z) == Z.hex()
+        assert cleaned_Z[k] == Z[k].hex()
 
 def test_trim_round_L():
     with pytest.raises(AssertionError):
@@ -389,10 +390,10 @@ def test_build_JSON_output():
     assert data['params']['S'] == 'S'
     assert data['params']['d'] == '00'*64
 
-@pytest.mark.skip(reason="not good yet")
+#@pytest.mark.skip(reason="not good yet")
 def test_PoW(): 
     M = 64
-    T = 2**5
+    T = 2**4
     S = 64
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
@@ -412,18 +413,18 @@ def test_PoW():
             assert data['params']['L'] == L
             assert data['params']['S'] == S
             assert data['params']['d'] == d.hex()
-           
+            
             # Verifying the answer
             
             N = data['answer']['N']
             unprocessed_Z = data['answer']['Z']
             unprocessed_round_L = data['answer']['round_L']
-            
+           
             # Preparing round_L
             round_L = {}
             for k in unprocessed_round_L:
                 round_L[int(k)] = [ int(x, 16).to_bytes(64, 'big') for x in unprocessed_round_L[k] ]
-            
+
             # Preparing Z
             Z = {}
             for k in unprocessed_Z:
@@ -455,11 +456,23 @@ def test_PoW():
             for p in range(P):
                 for i in range(n):
                     X[p*l + i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
+           
+            # This stores the elements of the previously built X in a dictionary,
+            # With a structure similira to { index: X[index]} with uncomputed elements
+            # (those for which X[index} == None) removed
+            X_dict = {k: v for k,v in enumerate([x for x in X if x != None])}
+            
+            for x in X_dict:
+                assert x != None
 
-            # Let's build a dict of all the nodes we know, that satisfies the requirement of compute_merkle_tree_node
-            known_nodes = {**Z, **{ k + (T-1) : v for k,v in round_L.items() } }
+            # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
+            known_nodes = {**Z, **{ k + (T-1) : v for k,v in X_dict.items() } }
+            print([ i + (T-1) for i in X_dict.keys() ])
+            print(Z.keys())
+            print(sorted(known_nodes.keys()))
+
             # Verifications
-            assert len(known_nodes) == len(Z) + len(round_L)
+            assert len(known_nodes) == len(Z) + len(X_dict)
 
             OMEGA = compute_merkle_tree_node(0, known_nodes, I, T, M)
             
