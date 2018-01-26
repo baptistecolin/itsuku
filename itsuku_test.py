@@ -437,6 +437,7 @@ def test_PoW():
 
             # Building back X
             X = [None]*T
+            #TODO : be more efficient on memory
             for i_j in round_L:
                 p = i_j//l
 
@@ -466,7 +467,7 @@ def test_PoW():
                 assert x != None
 
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
-            known_nodes = {**Z, **{ k + (T-1) : v for k,v in X_dict.items() } }
+            known_nodes = {**Z, **{ k + (T-1) : H(M,v) for k,v in X_dict.items() } }
             print([ i + (T-1) for i in X_dict.keys() ])
             print(Z.keys())
             print(sorted(known_nodes.keys()))
