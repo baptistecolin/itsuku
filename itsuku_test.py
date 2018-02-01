@@ -1,5 +1,6 @@
 import pytest
 from itsuku import *
+from opening import openingForOneArray
 
 def test_phi():
     # it shoud fail if the seed is not 4 bytes long
@@ -438,26 +439,58 @@ def test_PoW():
             # Building back X
             X = [None]*T
             #TODO : be more efficient on memory
-            for i_j in round_L:
-                p = i_j//l
-
-                # Building X[i_j]
-                hash_input = b''
-                for x in round_L[i_j]:
-                    hash_input += x
-                X[i_j] = H(M, hash_input)
-
-                # Building its antecedents
-                seed = round_L[i_j][0][:4]
-                phi_i = phis(seed, i_j%l, n)
-                for k, x in enumerate(round_L[i_j]):
-                   X[p*l + phi_i[k]] = x
-
-            # Building all elements that were built at step 1.a
+            
+            # First, building back elements that are built at step 1.a., that can be built from scratch
             for p in range(P):
                 for i in range(n):
-                    X[p*l + i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
-           
+                    X[p*l+i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
+
+            # Now, going through round_L to add the provided elements
+            for i_j in round_L:
+                # adding all the antecedents
+                seed = round_L[i_j][:4]
+                hash_input = b''
+                for k, phi_k_i in enumerate(phis(seed, i_j%l, n):
+                    X[p*l+phi_k_i] = round_L[i_j][k]
+                    hash_input += round_L[i_j][k]
+
+                # recomputing X[i_j] and adding it
+                X[i_j] = H(M, hash_input)  
+
+            
+            
+            
+            
+            
+            #for i_j in round_L:
+            #    p = i_j//l
+
+            #    # Building X[i_j]
+            #    hash_input = b''
+            #    for x in round_L[i_j]:
+            #        hash_input += x
+            #    print('X_i_j built')
+            #    print(i_j)
+            #    X[i_j] = H(M, hash_input)
+
+            #    # Building its antecedents
+            #    seed = round_L[i_j][0][:4]
+            #    phi_i = phis(seed, i_j%l, n)
+
+            #    print('antecedents built')
+            #    for k, x in enumerate(round_L[i_j]):
+            #       X[p*l + phi_i[k]] = x  
+            #       print(p*l + phi_i[k])
+
+            ## Building all elements that were built at step 1.a
+            #print('recomputed at 1.a')
+            #for p in range(P):
+            #    for i in range(n):
+            #        X[p*l + i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
+            #        print(p*l+i)
+            #
+            # Maybe we should add the X[i_j] that can be recomputed
+
             # This stores the elements of the previously built X in a dictionary,
             # With a structure similira to { index: X[index]} with uncomputed elements
             # (those for which X[index} == None) removed
@@ -468,7 +501,8 @@ def test_PoW():
 
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
             known_nodes = {**Z, **{ k + (T-1) : H(M,v) for k,v in X_dict.items() } }
-            print([ i + (T-1) for i in X_dict.keys() ])
+            print("before computation")
+            print([ i for i in X_dict.keys() ])
             print(Z.keys())
             print(sorted(known_nodes.keys()))
 
