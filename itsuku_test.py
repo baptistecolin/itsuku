@@ -448,9 +448,9 @@ def test_PoW():
             # Now, going through round_L to add the provided elements
             for i_j in round_L:
                 # adding all the antecedents
-                seed = round_L[i_j][:4]
+                seed = round_L[i_j][0][:4]
                 hash_input = b''
-                for k, phi_k_i in enumerate(phis(seed, i_j%l, n):
+                for k, phi_k_i in enumerate(phis(seed, i_j%l, n)):
                     X[p*l+phi_k_i] = round_L[i_j][k]
                     hash_input += round_L[i_j][k]
 
