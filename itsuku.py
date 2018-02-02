@@ -11,7 +11,7 @@ from opening import openingForOneArray as opening
 n = 4 # number of dependencies
 T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
-M = 64 # size of elements in the Merkel Tree
+M = 64 # size of elements in the Merkel Tree # TODO : different than 64 
 S = 64 # size of elements of Y
 L = 9 # length of one search
 d = b'\x00'*63 + b'\xff' # PoW difficulty (or strength)
@@ -70,19 +70,22 @@ def H(M,x,method=HASH):
         return output[:M]
 
 # TODO: implement function F
+# TODO: implement H_x
 
 # Turns the int 1024 into the byte string b'\x00\x00\x04\x00', that is fit for hashing
 def int_to_4bytes(n):
     return struct.pack('>I', n)
 
-def memory_build(I, T, n, P, M):
+def memory_build(I, T, n, P, M): # TODO : add x as parameter
+    # TODO: match paper methodology
+
     # Step (1)
     # Building a challenge dependent memory
     X = [None]*T
     
     assert T//P == floor(T/P)
     l = T//P
-    # Step (1.a)
+    # Step (1.a) TODO: comment
     for p in range(P):
         for i in range(n):
             hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
@@ -110,6 +113,8 @@ def memory_build(I, T, n, P, M):
 
 
 def merkle_tree(I, X, M):
+    # TODO: Match paper methodology
+
     # Building the Merkle Tree
     # It will be implemented as an array, each element being a node
     # The node at index i has its left son at index 2*i+1, and its right son at index 2*i+2
