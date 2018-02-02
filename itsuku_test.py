@@ -70,14 +70,14 @@ def test_int_to_4bytes():
 
 def test_memory_build():
     M = 64
-    x = 64
+    x = 32
     T = 2**5
     I = os.urandom(M)
 
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # it should work for different values of n. n can't get bigger than l, otherwise the n "seeds" cannot fit in a slice
-            X = memory_build(I, T, n, P, M)
+            X = memory_build(I, T, n, P, x, M)
 
             # Initialization steps
             for p in range(P):
@@ -106,6 +106,7 @@ def test_memory_build():
 
 def test_merkle_tree():
     M = 64
+    x = 32
     T = 2**5
     n = 2
     I = os.urandom(M)
@@ -113,7 +114,7 @@ def test_merkle_tree():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, M)
+            X = memory_build(I, T, n, P, x, M)
             
             MT = merkle_tree(I, X, M)
     
@@ -140,6 +141,7 @@ def test_merkle_tree():
 
 def test_compute_merkle_tree_node():
     M = 64
+    x = 32
     I = os.urandom(M)
 
     # basic examples
@@ -155,7 +157,7 @@ def test_compute_merkle_tree_node():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, M)
+            X = memory_build(I, T, n, P, x, M)
             MT = merkle_tree(I, X, M)
 
             known_nodes = { i:v for i,v in enumerate(MT) }
@@ -187,6 +189,7 @@ def test_xor():
 
 def test_compute_Y():
     M = 64
+    x = 32
     T = 2**5
     S = 64
     L = ceil(3.3*log(T,2))
@@ -195,7 +198,7 @@ def test_compute_Y():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, M)
+            X = memory_build(I, T, n, P, x, M)
             MT = merkle_tree(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -226,6 +229,7 @@ def test_is_PoW_solved():
 
 def test_build_L():
     M = 64
+    x = 32
     T = 2**5
     S = 64
     L = ceil(3.3*log(T,2))
@@ -234,7 +238,7 @@ def test_build_L():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, M)
+            X = memory_build(I, T, n, P, x, M)
             MT = merkle_tree(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -255,7 +259,7 @@ def test_build_L():
                     # assert that the elements of round_L are actually computable
                     for k in range(0,n):
                         stuff_to_hash = int_to_4bytes(k) + int_to_4bytes(p) + I
-                        assert round_L[i_j][k] == H(M, stuff_to_hash)
+                        assert round_L[i_j][k] == H(x, stuff_to_hash)
 
                 else:
                     seed = X[i_j-1][:4]
@@ -266,10 +270,11 @@ def test_build_L():
                     hash_input = b""
                     for item in round_L[i_j]:
                         hash_input += item
-                    assert H(M,hash_input) == X[i_j]
+                    assert H(x,hash_input) == X[i_j]
 
 def test_provided_indexes():
     M = 64
+    x = 32
     T = 2**5
     S = 64
     L = ceil(3.3*log(T,2))
@@ -278,7 +283,7 @@ def test_provided_indexes():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, M)
+            X = memory_build(I, T, n, P, x, M)
             MT = merkle_tree(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -318,6 +323,7 @@ def test_provided_indexes():
 
 def test_build_Z():
     M = 64
+    x = 32
     T = 2**5
     S = 64
     L = ceil(3.3*log(T,2))
@@ -326,7 +332,7 @@ def test_build_Z():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, M)
+            X = memory_build(I, T, n, P, x, M)
             MT = merkle_tree(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -374,7 +380,7 @@ def test_trim_round_L():
     assert trim_round_L(round_L_5, 4, 32, 6) == {7: ['00','fe','a4']}
 
 def test_build_JSON_output():
-    JSON = build_JSON_output(N=b'\x00'*63 + b'\xff', round_L={}, Z={}, P=4, T=32, n='n', I=b'\xff'*64, M='M', L='L', S='S', d=b'\x00'*64)
+    JSON = build_JSON_output(N=b'\x00'*63 + b'\xff', round_L={}, Z={}, P=4, T=32, n='n', I=b'\xff'*64, M='M', L='L', S='S', x='x', d=b'\x00'*64)
     
     data = json.loads(JSON)
     
@@ -389,11 +395,13 @@ def test_build_JSON_output():
     assert data['params']['M'] == 'M'
     assert data['params']['L'] == 'L'
     assert data['params']['S'] == 'S'
+    assert data['params']['x'] == 'x'
     assert data['params']['d'] == '00'*64
 
 #@pytest.mark.skip(reason="not good yet")
 def test_PoW(): 
     M = 64
+    x = 32
     T = 2**4
     S = 64
     L = ceil(3.3*log(T,2))
@@ -403,7 +411,7 @@ def test_PoW():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n 
-            json_output = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d)
+            json_output = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d)
             data = json.loads(json_output)
 
             assert data['params']['P'] == P
@@ -413,6 +421,7 @@ def test_PoW():
             assert data['params']['M'] == M
             assert data['params']['L'] == L
             assert data['params']['S'] == S
+            assert data['params']['x'] == x
             assert data['params']['d'] == d.hex()
             
             # Verifying the answer

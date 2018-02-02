@@ -11,7 +11,7 @@ from opening import openingForOneArray as opening
 n = 4 # number of dependencies
 T = 2**5 # length of the main array
 x = 64 # size of elements in the main array
-M = 64 # size of elements in the Merkel Tree # TODO : different than 64 
+M = 64 # size of elements in the Merkel Tree 
 S = 64 # size of elements of Y
 L = 9 # length of one search
 d = b'\x00'*63 + b'\xff' # PoW difficulty (or strength)
@@ -75,7 +75,7 @@ def H(M,x,method=HASH):
 def int_to_4bytes(n):
     return struct.pack('>I', n)
 
-def memory_build(I, T, n, P, M): # TODO : add x as parameter
+def memory_build(I, T, n, P, x, M): 
     # TODO: match paper methodology
 
     # Step (1)
@@ -269,7 +269,7 @@ def trim_round_L(round_L, P, T, n):
 
     return trimmed_round_L
 
-def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
+def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, x, d):
     data = {'answer':{}, 'params':{}}
     
     data['answer']['N'] = N.hex()
@@ -284,13 +284,14 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, d):
     data['params']['M'] = M
     data['params']['L'] = L
     data['params']['S'] = S
+    data['params']['x'] = x
     data['params']['d'] = d.hex()
 
     return json.dumps(data, separators=(',',':'))
 
 
-def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d):
-    X = memory_build(I, T, n, P, M)
+def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d):
+    X = memory_build(I, T, n, P, x, M)
     MT = merkle_tree(I, X, M)
     
     PSI = MT[0]
@@ -326,6 +327,7 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d):
             M=M,
             L=L,
             S=S,
+            x=x,
             d=d
         )
 
