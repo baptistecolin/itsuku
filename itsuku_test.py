@@ -443,7 +443,6 @@ def test_PoW():
             # First, building back elements that are built at step 1.a., that can be built from scratch
             for p in range(P):
                 for i in range(n):
-                    print(p*l+i)
                     X[p*l+i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
 
             # Now, going through round_L to add the provided elements
