@@ -70,7 +70,6 @@ def H(M,x,method=HASH):
         return output[:M]
 
 # TODO: implement function F
-# TODO: implement H_x
 
 # Turns the int 1024 into the byte string b'\x00\x00\x04\x00', that is fit for hashing
 def int_to_4bytes(n):
@@ -85,14 +84,14 @@ def memory_build(I, T, n, P, M): # TODO : add x as parameter
     
     assert T//P == floor(T/P)
     l = T//P
-    # Step (1.a) TODO: comment
+    # Step (1.a) : Building initial elements, using only i, p and I
     for p in range(P):
         for i in range(n):
             hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
     
             X[p*l+i] = H(x, hash_input)
     
-    # Step (1.b)
+    # Step (1.b) : Building other elements, which depend on the initial elements
     for p in range(P):
         for i in range(n,l):
             # The seed that is used by phi is the 4 first bytes of X[p*l+i-1]
