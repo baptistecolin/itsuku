@@ -441,16 +441,20 @@ def test_PoW():
             #TODO : be more efficient on memory
             
             # First, building back elements that are built at step 1.a., that can be built from scratch
+            print('initials :')
             for p in range(P):
                 for i in range(n):
+                    print(p*l+i)
                     X[p*l+i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
 
             # Now, going through round_L to add the provided elements
             for i_j in round_L:
+                print('i_j : ' + str(i_j))
                 # adding all the antecedents
                 seed = round_L[i_j][0][:4]
                 hash_input = b''
                 for k, phi_k_i in enumerate(phis(seed, i_j%l, n)):
+                    print("\t p*l+phi_k_i : " + str(p*l+phi_k_i))
                     X[p*l+phi_k_i] = round_L[i_j][k]
                     hash_input += round_L[i_j][k]
 
@@ -458,8 +462,9 @@ def test_PoW():
                 X[i_j] = H(M, hash_input)  
 
             
-            
-            
+            print('X :')
+            for i in range(len(X)):
+                print(i, X[i])
             
             
             #for i_j in round_L:
@@ -494,9 +499,10 @@ def test_PoW():
             # This stores the elements of the previously built X in a dictionary,
             # With a structure similira to { index: X[index]} with uncomputed elements
             # (those for which X[index} == None) removed
-            X_dict = {k: v for k,v in enumerate([x for x in X if x != None])}
+            X_dict = {k: v for k,v in enumerate([x for x in X]) if v != None}
             
             for x in X_dict:
+                assert X[x] == X_dict[x]
                 assert x != None
 
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
