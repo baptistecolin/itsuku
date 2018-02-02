@@ -470,10 +470,6 @@ def test_PoW():
 
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
             known_nodes = {**Z, **{ k + (T-1) : H(M,v) for k,v in X_dict.items() } }
-            print("before computation")
-            print([ i for i in X_dict.keys() ])
-            print(Z.keys())
-            print(sorted(known_nodes.keys()))
 
             # Verifications
             assert len(known_nodes) == len(Z) + len(X_dict)
