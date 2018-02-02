@@ -191,7 +191,7 @@ def test_compute_Y():
     M = 64
     x = 32
     T = 2**5
-    S = 64
+    S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
     
@@ -231,7 +231,7 @@ def test_build_L():
     M = 64
     x = 32
     T = 2**5
-    S = 64
+    S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
      
@@ -276,7 +276,7 @@ def test_provided_indexes():
     M = 64
     x = 32
     T = 2**5
-    S = 64
+    S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
      
@@ -325,7 +325,7 @@ def test_build_Z():
     M = 64
     x = 32
     T = 2**5
-    S = 64
+    S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
     
@@ -403,10 +403,10 @@ def test_PoW():
     M = 64
     x = 32
     T = 2**4
-    S = 64
+    S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-    d = b'\x00'*64 # minimal difficulty
+    d = b'\x00'*S # minimal difficulty
 
     for P in [1,2,4]:
         l = T//P

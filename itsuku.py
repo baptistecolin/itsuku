@@ -14,7 +14,7 @@ x = 64 # size of elements in the main array
 M = 64 # size of elements in the Merkel Tree 
 S = 64 # size of elements of Y
 L = 9 # length of one search
-d = b'\x00'*63 + b'\xff' # PoW difficulty (or strength)
+d = b'\x00'*(S-1) + b'\xff' # PoW difficulty (or strength)
 #l = 2**15 # length of segment
 l = 2**5
 P = T/l # number of independent sequences
@@ -177,9 +177,9 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     
     return Y, OMEGA, i
 
-def is_PoW_solved(d, x):
-    assert len(x) == 64
-    assert len(d) == 64
+def is_PoW_solved(d, x, S=S):
+    assert len(x) == S
+    assert len(d) == S
     # using the lexicographic order
     return x > d
 
@@ -302,7 +302,7 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d):
 
     Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
     counter = 0
-    while not(is_PoW_solved(d, OMEGA)):
+    while not(is_PoW_solved(d, OMEGA, S)):
         N = os.urandom(32) # Choosing a new nonce
         Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
 
