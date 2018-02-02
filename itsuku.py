@@ -6,6 +6,7 @@ import json
 from hashlib import sha512
 from math import floor, ceil, log
 from opening import openingForOneArray as opening
+# TODO : consider adding typing (import typing) 
 
 n = 4 # number of dependencies
 T = 2**5 # length of the main array
@@ -239,7 +240,9 @@ def provided_indexes(round_L, P, T, n):
 def build_Z(round_L, MT, P, T, n):
 
     indexes = provided_indexes(round_L, P, T, n)
+    
     opening_indexes = opening(T, indexes)
+
     Z = dict.fromkeys(opening_indexes)
     for k in Z :
         Z[k] = MT[k]
@@ -308,7 +311,7 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d):
     Z = build_Z(round_L, MT, P, T, n)
     assert len(Z)!=0
 
-    json = build_JSON_output(
+    json_output = build_JSON_output(
             N=N,
             round_L=round_L,
             Z=Z,
@@ -322,4 +325,4 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, d=d):
             d=d
         )
 
-    return json
+    return json_output
