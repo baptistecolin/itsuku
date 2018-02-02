@@ -417,10 +417,11 @@ def test_PoW():
             
             # Verifying the answer
             
-            N = data['answer']['N']
+            N = int(data['answer']['N'], 16).to_bytes(64, 'big')
             unprocessed_Z = data['answer']['Z']
             unprocessed_round_L = data['answer']['round_L']
-           
+            I = int(data['params']['I'], 16).to_bytes(64, 'big')          
+
             # Preparing round_L
             round_L = {}
             for k in unprocessed_round_L:
@@ -477,8 +478,8 @@ def test_PoW():
             # Verifications
             assert len(known_nodes) == len(Z) + len(X_dict)
 
-            OMEGA = compute_merkle_tree_node(0, known_nodes, I, T, M)
-            
+            PSI = compute_merkle_tree_node(0, known_nodes, I, T, M)
+
             # We can now use the previous functions to compute i and OMEGA
             Y, OMEGA, computed_i = compute_Y(I, X, L, S, N, PSI)
             
