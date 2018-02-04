@@ -76,40 +76,28 @@ def int_to_4bytes(n):
     return struct.pack('>I', n)
 
 def memory_build(I, T, n, P, x, M): 
-    # TODO: match paper methodology
-
-    # Step (1)
-    # Building a challenge dependent memory
     X = [None]*T
-    
-    assert T//P == floor(T/P)
-    l = T//P
-    # Step (1.a) : Building initial elements, using only i, p and I
-    for p in range(P):
-        for i in range(n):
-            hash_input = int_to_4bytes(i) + int_to_4bytes(p) + I
-    
-            X[p*l+i] = H(x, hash_input)
-    
-    # Step (1.b) : Building other elements, which depend on the initial elements
-    for p in range(P):
-        for i in range(n,l):
-            # The seed that is used by phi is the 4 first bytes of X[p*l+i-1]
-            seed = X[p*l+i-1][:4]
 
-            # computing phi_{k}(i) for all k up until n
-            phis_list = phis(seed,i,n)
-    
-            # building the input of the hash function
-            hash_input = b""
-            for phi in phis_list:
-                hash_input += X[p*l+ phi]
+    l = T//P
+    assert float(l) == T/P
+
+    for p in range(P):
+        # Step 1.a. : Building initial elements out of i, p and I
+        for i in range(n):
+            X[p*l+i] = H(x, int_to_4bytes(i) + int_to_4bytes(p) + I)
+
+        # Step 1.b. : Building elements that depend on antecedents using phi functions
+        for i in range(n, l):
             
-            # inserting the computed hash in the array
+            # Building the input
+            seed = X[p*l + i-1][:4]
+            hash_input = b''
+            for phi_k_i in phis(seed, i, n):
+                hash_input += X[p*l + phi_k_i]
+
             X[p*l+i] = H(x, hash_input)
 
     return X
-
 
 def merkle_tree(I, X, M):
     # TODO: Match paper methodology
