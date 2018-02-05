@@ -480,6 +480,6 @@ def test_PoW():
             # Verifying the two conditions that define the success of the PoW :
             #
             # 1. OMEGA satisfies the difficulty constraint
-            assert is_PoW_solved(d, OMEGA) == True
+            assert is_PoW_solved(d, OMEGA, S=S) == True
             # 2. The keys of round_L correspond the i that has been computed by compute_Y
-            assert computed_i == list(round_L.keys())
+            assert set(computed_i) == set(round_L.keys())
