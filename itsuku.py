@@ -298,7 +298,6 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d):
     
     round_L = build_L(i, X, P, n)
     Z = build_Z(round_L, MT, P, T, n)
-    assert len(Z)!=0
 
     json_output = build_JSON_output(
             N=N,
