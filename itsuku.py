@@ -100,24 +100,20 @@ def memory_build(I, T, n, P, x, M):
     return X
 
 def merkle_tree(I, X, M):
-    # TODO: Match paper methodology
+    T = len(X)
 
-    # Building the Merkle Tree
-    # It will be implemented as an array, each element being a node
-    # The node at index i has its left son at index 2*i+1, and its right son at index 2*i+2
-    # The array is of length 2T-1, with T being the length of X (full binary tree)
-    T = len(X) 
-    # The leaves of the tree are the elements of X. Thus, MT[-T:] == hash(X). 
-    MT = [None]*(2*T-1)
-    MT[-T:] = [ H(M,x) for x in X ] 
-
-    # Building the non-leaf nodes
-    for i in range(T-2,-1,-1): # Decreasing iteration from len(X)-1 to 0, both included
-        MT[i] = H(M, MT[2*i+1] + MT[2*i+2] + I ) #Hash of left son + right son + challenge
+    # Step 2.a. : Building array repreetig Merkle-tree
+    B = [None]*(2*T-1)
     
-    return MT
+    # Step 2.b. : Compute leaf elements out of hashes of X
+    for i in range(T):
+        B[i + T - 1] =  H(M, X[i] + I)
 
-    # TODO : add exceptions so it manages to build a merkle tree that has a number of leaves that is not 2^n
+    # Step 2.c. : Compute intermediate elements as hashes of their sons
+    for i in range(T-2, -1, -1): # Downward iteration from T-2 to 0, both included
+        B[i] = H(M, B[2*i+1] + B[2*i+2] + I )
+
+    return B
 
 # Let's use a recursive function !
 # T = number of leaves of the MT

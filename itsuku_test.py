@@ -121,7 +121,7 @@ def test_merkle_tree():
             # asserting the length is 2*T-1
             assert len(MT) == 2*T-1
             # asserting the end of the MT is actually the hashed original array
-            assert MT[-T:] == [H(M,x) for x in X]
+            assert MT[-T:] == [H(M, x+I) for x in X]
             # asserting the constructed items are the hash of their sons
             for i in range(T-1):
                 assert MT[i] == H(M, MT[2*i+1]+MT[2*i+2]+I)
@@ -349,7 +349,7 @@ def test_build_Z():
                 assert k not in indexes
                 assert Z[k] == MT[k]
                 if k >= T-1:
-                    assert Z[k] == H( M, X[k-(T-1)] )
+                    assert Z[k] == H( M, X[k-(T-1)]+I )
             
             assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, P, T, n)))
 
