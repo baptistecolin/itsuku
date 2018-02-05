@@ -447,8 +447,7 @@ def test_PoW():
                 assert k+(T-1) not in Z
 
             # Building back X
-            X = [None]*T
-            #TODO : be more efficient on memory
+            X = {}
             
             # First, building back elements that are built at step 1.a., that can be built from scratch
             for p in range(P):
@@ -467,21 +466,11 @@ def test_PoW():
                 # recomputing X[i_j] and adding it
                 X[i_j] = H(M, hash_input)  
 
-
-            # This stores the elements of the previously built X in a dictionary,
-            # With a structure similira to { index: X[index]} with uncomputed elements
-            # (those for which X[index} == None) removed
-            X_dict = {k: v for k,v in enumerate([x for x in X]) if v != None}
-            
-            for x in X_dict:
-                assert X[x] == X_dict[x]
-                assert x != None
-
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
-            known_nodes = {**Z, **{ k + (T-1) : H(M,v) for k,v in X_dict.items() } }
+            known_nodes = {**Z, **{ k + (T-1) : H(M,v)+I for k,v in X.items() } }
 
             # Verifications
-            assert len(known_nodes) == len(Z) + len(X_dict)
+            assert len(known_nodes) == len(Z) + len(X)
 
             PSI = compute_merkle_tree_node(0, known_nodes, I, T, M)
 
