@@ -411,7 +411,7 @@ def test_PoW():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n 
-            json_output = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d)
+            json_output, X_PoW, MT_PoW, PSI_PoW, N_PoW, Y_PoW, OMEGA_PoW, i_PoW, round_L_PoW, Z_PoW = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=True)
             data = json.loads(json_output)
 
             assert data['params']['P'] == P
@@ -465,10 +465,11 @@ def test_PoW():
 
                 # recomputing X[i_j] and adding it
                 X[i_j] = H(M, hash_input)  
+            
 
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
             known_nodes = {**Z, **{ k + (T-1) : H(M,v)+I for k,v in X.items() } }
-
+            
             # Verifications
             assert len(known_nodes) == len(Z) + len(X)
 

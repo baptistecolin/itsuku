@@ -228,7 +228,7 @@ def provided_indexes(round_L, P, T, n):
 def build_Z(round_L, MT, P, T, n):
 
     indexes = provided_indexes(round_L, P, T, n)
-    
+
     opening_indexes = opening(T, indexes)
 
     Z = dict.fromkeys(opening_indexes)
@@ -274,7 +274,7 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, x, d):
     return json.dumps(data, separators=(',',':'))
 
 
-def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d):
+def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=False):
     X = memory_build(I, T, n, P, x, M)
     MT = merkle_tree(I, X, M)
     
@@ -313,5 +313,7 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d):
             x=x,
             d=d
         )
-
-    return json_output
+    if debug:
+        return json_output, X, MT, PSI, N, Y, OMEGA, i, round_L, Z
+    else:
+        return json_output
