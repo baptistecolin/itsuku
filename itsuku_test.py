@@ -482,4 +482,4 @@ def test_PoW():
             # 1. OMEGA satisfies the difficulty constraint
             assert is_PoW_solved(d, OMEGA, S=S) == True
             # 2. The keys of round_L correspond the i that has been computed by compute_Y
-            assert set(computed_i) == set(round_L.keys())
+            assert sorted(computed_i) == sorted(round_L.keys())
