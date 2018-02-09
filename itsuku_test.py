@@ -411,7 +411,7 @@ def test_PoW():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n 
-            json_output, X_PoW, MT_PoW, PSI_PoW, N_PoW, Y_PoW, OMEGA_PoW, i_PoW, round_L_PoW, Z_PoW = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=True)
+            json_output, X_PoW, MT_PoW, PSI_PoW, N_PoW, I_PoW, Y_PoW, OMEGA_PoW, i_PoW, round_L_PoW, Z_PoW = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=True)
             data = json.loads(json_output)
 
             assert data['params']['P'] == P
@@ -427,9 +427,13 @@ def test_PoW():
             # Verifying the answer
             
             N = int(data['answer']['N'], 16).to_bytes(64, 'big')
+            assert N == N_PoW
+
+            I = int(data['params']['I'], 16).to_bytes(64, 'big')
+            assert I == I_PoW
+
             unprocessed_Z = data['answer']['Z']
             unprocessed_round_L = data['answer']['round_L']
-            I = int(data['params']['I'], 16).to_bytes(64, 'big')          
 
             # Preparing round_L
             round_L = {}
