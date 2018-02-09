@@ -447,7 +447,9 @@ def test_PoW():
             # Preparing Z
             Z = {}
             for k in unprocessed_Z:
-                Z[int(k)] = int(unprocessed_Z[k], 16).to_bytes(64, 'big')
+                Z[int(k)] = bytes.fromhex(unprocessed_Z[k])
+            
+            assert Z == Z_PoW
 
             # Verifications
             for k in round_L:
