@@ -426,10 +426,10 @@ def test_PoW():
             
             # Verifying the answer
             
-            N = int(data['answer']['N'], 16).to_bytes(64, 'big')
+            N = bytes.fromhex(data['answer']['N'])
             assert N == N_PoW
 
-            I = int(data['params']['I'], 16).to_bytes(64, 'big')
+            I = bytes.fromhex(data['params']['I'])
             assert I == I_PoW
 
             unprocessed_Z = data['answer']['Z']

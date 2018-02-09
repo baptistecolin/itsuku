@@ -314,6 +314,6 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=False):
             d=d
         )
     if debug:
-        return json_output, X, MT, PSI, N, Y, OMEGA, i, round_L, Z
+        return json_output, X, MT, PSI, N, I, Y, OMEGA, i, round_L, Z
     else:
         return json_output
