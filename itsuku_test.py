@@ -438,7 +438,11 @@ def test_PoW():
             # Preparing round_L
             round_L = {}
             for k in unprocessed_round_L:
-                round_L[int(k)] = [ int(x, 16).to_bytes(64, 'big') for x in unprocessed_round_L[k] ]
+                round_L[int(k)] = [ bytes.fromhex(x) for x in unprocessed_round_L[k] ]
+            
+            # asserting correct construction, but trimming elements of round_L_PoW that were built at step 1.a
+            # and were not featured in the json_output
+            assert round_L == {k:v for k,v in round_L_PoW.items() if k%l >= n}
 
             # Preparing Z
             Z = {}
