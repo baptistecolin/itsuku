@@ -462,7 +462,7 @@ def test_PoW():
             # First, building back elements that are built at step 1.a., that can be built from scratch
             for p in range(P):
                 for i in range(n):
-                    X[p*l+i] = H(M, int_to_4bytes(i) + int_to_4bytes(p) + I)
+                    X[p*l+i] = H(x, int_to_4bytes(i) + int_to_4bytes(p) + I)
 
             # Now, going through round_L to add the provided elements
             for i_j in round_L:
@@ -474,8 +474,11 @@ def test_PoW():
                     hash_input += round_L[i_j][k]
 
                 # recomputing X[i_j] and adding it
-                X[i_j] = H(M, hash_input)  
-            
+                X[i_j] = H(x, hash_input)  
+           
+            # asserting correct reconstruction
+            for a,e in X.items():
+                assert X_PoW[a] == e
 
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
             known_nodes = {**Z, **{ k + (T-1) : H(M,v)+I for k,v in X.items() } }
