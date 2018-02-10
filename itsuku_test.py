@@ -481,7 +481,10 @@ def test_PoW():
                 assert X_PoW[a] == e
 
             # Let's build a dict of all the nodes we know (round_L, Z, and the precomputable ones), that satisfies the requirement of compute_merkle_tree_node
-            known_nodes = {**Z, **{ k + (T-1) : H(M,v)+I for k,v in X.items() } }
+            known_nodes = {**Z, **{ k + (T-1) : H(M, v+I) for k,v in X.items() } }
+
+            for index, node in known_nodes.items():
+                assert MT_PoW[index] == node
             
             # Verifications
             assert len(known_nodes) == len(Z) + len(X)
