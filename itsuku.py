@@ -6,7 +6,9 @@ import json
 from hashlib import sha512
 from math import floor, ceil, log
 from opening import openingForOneArray as opening
-# TODO : consider adding typing (import typing) 
+from collections import OrderedDict
+# TODO : consider adding typing (import typing)
+
 
 n = 4 # number of dependencies
 T = 2**5 # length of the main array
@@ -168,23 +170,23 @@ def is_PoW_solved(d, x, S=S):
     return x > d
 
 def build_L(i, X, P, n):
-    round_L = {} # will associate each index with the corresponding leaf and antecedent leaves
+    round_L = OrderedDict.fromkeys(i) # will associate each index with the corresponding leaf and antecedent leaves
     
     # computing l
     l = len(X)//P
     assert l == floor(len(X)//P)
 
-    for j in range(len(i)):
-        p = i[j] // l
+    for i_j in round_L:
+        p = i_j // l
         
-        if i[j] % l < n:
+        if i_j % l < n:
             # i[j] is such that X[i[j]] was built at step 1.a
-            round_L[i[j]] = X[p*l:p*l+n]
+            round_L[i_j] = X[p*l:p*l+n]
         else :
             # i[j] is such that X[i[j]] was built at step 1.b
-            seed = X[i[j]-1][:4]
-            round_L[i[j]] = [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i[j]%l , n) ]
-        
+            seed = X[i_j-1][:4]
+            round_L[i_j] = [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i_j%l , n) ]
+    
     return round_L
 
 
