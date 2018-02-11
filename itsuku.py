@@ -288,7 +288,7 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=False):
     counter = 0
     while not(is_PoW_solved(d, OMEGA, S)):
         N = os.urandom(32) # Choosing a new nonce
-        Y, OMEGA = compute_Y(I,X,L,S,N,PSI)
+        Y, OMEGA, i = compute_Y(I,X,L,S,N,PSI)
 
         counter += 1
         if counter % 25 == 0:
