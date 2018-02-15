@@ -1,6 +1,7 @@
 import pytest
 from itsuku import *
 from opening import openingForOneArray
+from collections import OrderedDict
 
 def test_phi():
     # it shoud fail if the seed is not 4 bytes long
@@ -365,15 +366,15 @@ def test_trim_round_L():
         trim_round_L({}, 5, 2, 0)
     
     # Assert that the intended items are trimmed off of the dict
-    round_L_1 = {7: [], 15:[]} # should remain unchanged if (P, T, n) = (32, 4, 6)
-    round_L_2 = {5: [], 10:[]} # should be totally trimmed
-    round_L_3 = {6: [], 14:[]} # edge case : should remain unchanged
-    round_L_4 = {5: [], 15:[]} # should be partially modified
+    round_L_1 = {7: [b'\x00'], 15:[b'\x00']} # should remain unchanged if (P, T, n) = (32, 4, 6)
+    round_L_2 = {5: [b'\x00'], 10:[b'\x00']} # should be totally trimmed
+    round_L_3 = {6: [b'\x00'], 14:[b'\x00']} # edge case : should remain unchanged
+    round_L_4 = {5: [b'\x00'], 15:[b'\x00']} # should be partially modified
 
-    assert trim_round_L(round_L_1 , 4, 32, 6) == round_L_1
-    assert trim_round_L(round_L_2 , 4, 32, 6) == {}
-    assert trim_round_L(round_L_3 , 4, 32, 6) == round_L_3
-    assert trim_round_L(round_L_4 , 4, 32, 6) == {15:[]}
+    assert trim_round_L(round_L_1 , 4, 32, 6) == {7: ['00'], 15: ['00']}
+    assert trim_round_L(round_L_2 , 4, 32, 6) == {5: [], 10: []}
+    assert trim_round_L(round_L_3 , 4, 32, 6) == {6: ['00'], 14: ['00']}
+    assert trim_round_L(round_L_4 , 4, 32, 6) == {5: [], 15:['00']}
 
     # Assert that the bytearrays are properly converted
     round_L_5 = {7: [b'\x00', b'\xfe', b'\xa4']}
@@ -440,6 +441,8 @@ def test_PoW():
             for k in unprocessed_round_L:
                 round_L[int(k)] = [ bytes.fromhex(x) for x in unprocessed_round_L[k] ]
             
+            #print(round_L.keys())
+
             # asserting correct construction, but trimming elements of round_L_PoW that were built at step 1.a
             # and were not featured in the json_output
             assert round_L == {k:v for k,v in round_L_PoW.items() if k%l >= n}
@@ -488,8 +491,10 @@ def test_PoW():
             
             # Verifications
             assert len(known_nodes) == len(Z) + len(X)
-
+                
             PSI = compute_merkle_tree_node(0, known_nodes, I, T, M)
+
+            assert PSI == PSI_PoW
 
             # We can now use the previous functions to compute i and OMEGA
             Y, OMEGA, computed_i = compute_Y(I, X, L, S, N, PSI)

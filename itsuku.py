@@ -251,7 +251,18 @@ def trim_round_L(round_L, P, T, n):
     # built at step 1.a can be recomputed knowing only I
     # Also, converting the bytearray elements of X to a format 
     # that can be JSON-serialized
-    trimmed_round_L = { k: [item.hex() for item in v] for k,v in round_L.items() if k % l >= n }
+    trimmed_round_L = OrderedDict.fromkeys(round_L.keys())
+    
+    for k in trimmed_round_L:
+        if k % l >= n:
+            trimmed_round_L[k]= [ item.hex() for item in round_L[k] ]
+        else:
+            trimmed_round_L[k] = []
+
+    print(trimmed_round_L.keys())
+    print(trimmed_round_L)
+
+    #trimmed_round_L = { k: [item.hex() for item in v] for k,v in round_L.items() if k % l >= n }
 
     return trimmed_round_L
 
