@@ -160,7 +160,7 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     else:
         OMEGA_input = b''.join(Y[::-1])
     OMEGA = H(S, OMEGA_input)
-    
+   
     return Y, OMEGA, i
 
 def is_PoW_solved(d, x, S=S):
@@ -258,11 +258,6 @@ def trim_round_L(round_L, P, T, n):
             trimmed_round_L[k]= [ item.hex() for item in round_L[k] ]
         else:
             trimmed_round_L[k] = []
-
-    print(trimmed_round_L.keys())
-    print(trimmed_round_L)
-
-    #trimmed_round_L = { k: [item.hex() for item in v] for k,v in round_L.items() if k % l >= n }
 
     return trimmed_round_L
 
