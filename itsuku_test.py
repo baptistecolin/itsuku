@@ -413,7 +413,7 @@ def test_PoW():
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n 
             json_output, X_PoW, MT_PoW, PSI_PoW, N_PoW, I_PoW, Y_PoW, OMEGA_PoW, i_PoW, round_L_PoW, Z_PoW = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=True)
-            data = json.loads(json_output)
+            data = json.loads(json_output, object_pairs_hook=OrderedDict)
 
             assert data['params']['P'] == P
             assert data['params']['T'] == T
@@ -437,15 +437,14 @@ def test_PoW():
             unprocessed_round_L = data['answer']['round_L']
 
             # Preparing round_L
-            round_L = {}
+
+            round_L = OrderedDict.fromkeys(unprocessed_round_L)
             for k in unprocessed_round_L:
                 round_L[int(k)] = [ bytes.fromhex(x) for x in unprocessed_round_L[k] ]
+                del round_L[k] # the key used to be denoted by a char, and has to go
             
-            #print(round_L.keys())
-
-            # asserting correct construction, but trimming elements of round_L_PoW that were built at step 1.a
-            # and were not featured in the json_output
-            assert round_L == {k:v for k,v in round_L_PoW.items() if k%l >= n}
+            # assert correct construction
+            assert round_L == {k:(v if k%l >= n else []) for k,v in round_L_PoW.items()}
 
             # Preparing Z
             Z = {}
