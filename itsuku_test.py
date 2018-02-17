@@ -455,7 +455,7 @@ def test_PoW():
 
             # Verifications
             for k in round_L:
-                assert k+(T-1)>=T
+                assert T-1 <= k+(T-1) < 2*T-1
                 assert k+(T-1) not in Z
 
             # Building back X
@@ -468,16 +468,17 @@ def test_PoW():
 
             # Now, going through round_L to add the provided elements
             for i_j in round_L:
-                # adding all the antecedents
-                seed = round_L[i_j][0][:4]
-                hash_input = b''
-                for k, phi_k_i in enumerate(phis(seed, i_j%l, n)):
-                    X[p*l+phi_k_i] = round_L[i_j][k]
-                    hash_input += round_L[i_j][k]
+                if i_j%l >= n :
+                    # adding all the antecedents
+                    seed = round_L[i_j][0][:4]
+                    hash_input = b''
+                    for k, phi_k_i in enumerate(phis(seed, i_j%l, n)):
+                        X[p*l+phi_k_i] = round_L[i_j][k]
+                        hash_input += round_L[i_j][k]
 
-                # recomputing X[i_j] and adding it
-                X[i_j] = H(x, hash_input)  
-           
+                    # recomputing X[i_j] and adding it
+                    X[i_j] = H(x, hash_input)  
+            
             # asserting correct reconstruction
             for a,e in X.items():
                 assert X_PoW[a] == e
@@ -496,11 +497,15 @@ def test_PoW():
             assert PSI == PSI_PoW
 
             # We can now use the previous functions to compute i and OMEGA
-            Y, OMEGA, computed_i = compute_Y(I, X, L, S, N, PSI)
+            Y, OMEGA, computed_i = compute_Y(I, X, T, L, S, N, PSI)
+
+            assert Y == Y_PoW
+            assert OMEGA == OMEGA_PoW
             
             # Verifying the two conditions that define the success of the PoW :
             #
             # 1. OMEGA satisfies the difficulty constraint
+            assert computed_i == i_PoW
             assert is_PoW_solved(d, OMEGA, S=S) == True
             # 2. The keys of round_L correspond the i that has been computed by compute_Y
-            assert sorted(computed_i) == sorted(round_L.keys())
+            assert set(computed_i) == set(round_L.keys())
