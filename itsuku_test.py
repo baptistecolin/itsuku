@@ -204,7 +204,7 @@ def test_compute_Y():
             PSI = MT[0]
             N = os.urandom(32) # nounce
 
-            Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+            Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
 
             # asserting length
             assert len(Y) == L+1
@@ -243,7 +243,7 @@ def test_build_L():
             MT = merkle_tree(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
-            Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+            Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
 
             round_L = build_L(i, X, P, n)
             
@@ -288,7 +288,7 @@ def test_provided_indexes():
             MT = merkle_tree(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
-            Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+            Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
             round_L = build_L(i, X, P, n)
 
             indexes = provided_indexes(round_L, P, T, n)
@@ -337,7 +337,7 @@ def test_build_Z():
             MT = merkle_tree(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
-            Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+            Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
             round_L = build_L(i, X, P, n)
             
             Z = build_Z(round_L, MT, P, T, n)

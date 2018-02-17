@@ -139,7 +139,7 @@ def xor(a,b):
     return bytes(x ^ y for x, y in zip(a,b))
 
 
-def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
+def compute_Y(I, X, T, L, S, N, PSI, byte_order='big'):
     # Build array Y of length L+1
     Y = [None]*(L+1)
 
@@ -150,7 +150,7 @@ def compute_Y(I, X, L, S, N, PSI, byte_order='big'):
     i = [None]*L
     for j in range(1, L+1):
         # Step 5.a
-        i[j-1] = int.from_bytes(Y[j-1], byte_order) % len(X)
+        i[j-1] = int.from_bytes(Y[j-1], byte_order) % T
         # Step 5.b
         Y[j] = H(S, Y[j-1] + xor(X[i[j-1]], I))
 
@@ -292,11 +292,11 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=False):
     N = os.urandom(32)
    
 
-    Y, OMEGA, i = compute_Y(I, X, L, S, N, PSI)
+    Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
     counter = 0
     while not(is_PoW_solved(d, OMEGA, S)):
         N = os.urandom(32) # Choosing a new nonce
-        Y, OMEGA, i = compute_Y(I,X,L,S,N,PSI)
+        Y, OMEGA, i = compute_Y(I,X,T,L,S,N,PSI)
 
         counter += 1
         if counter % 25 == 0:
