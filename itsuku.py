@@ -24,20 +24,16 @@ I = os.urandom(M) # initial challenge (randomly generated M bytes array)
 HASH = 'sha512' # hash function
 
 # compute the Argon2 phi function
-def phi(seed, i, byte_order='big', method='high-level'):
+def phi(seed, i, byte_order='big'):
     # Will only work as expected if the seed is 4 bytes long
-    assert len(seed) == 4
+    assert type(seed) == bytes and len(seed) == 4
 
-    J = int.from_bytes(seed, byte_order)
-    R = i-1
+    j = int.from_bytes(seed, byte_order)
 
-    if method == 'high-level':
-        res = R*(1-((J*J)//(2**64)))
-    else:
-        # operations page 7 in https://www.cryptolux.org/images/0/0d/Argon2.pdf
-        x = (J**2)//(2**32)
-        y = ((i-1)*x)//(2**32)
-        res = i - 1 - y
+    # operations page 7 in https://www.cryptolux.org/images/0/0d/Argon2.pdf
+    x = (j**2) // (2**32)
+    y = ((i-1)*x) // (2**32)
+    res = i - 1 - y
 
     return res
 
