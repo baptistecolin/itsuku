@@ -19,7 +19,11 @@ d = b'\x00'*(S-1) + b'\xff' # PoW difficulty (or strength)
 #l = 2**15 # length of segment
 l = 2**5
 P = T/l # number of independent sequences
-I = os.urandom(M) # initial challenge (randomly generated M bytes array)
+I = os.urandom(64) # initial challenge (randomly generated M bytes array)
+
+# needed seed size is 4 bytes
+assert 4 <= x
+assert M <= x
 
 HASH = 'sha512' # hash function
 
@@ -97,8 +101,9 @@ def memory_build(I, T, n, P, x):
         # Step 1.b: build elements that depend on antecedents using phi functions
         for i in range(n, l):
             seed = X[p*l + i-1][:4]
-            hinput = b''
+
             # ??? this is a simplified version
+            hinput = b''
             for phi_k_i in phis(seed, i, n):
                 hinput += X[p*l + phi_k_i]
 
