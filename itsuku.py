@@ -147,32 +147,33 @@ def compute_merkle_tree_node(index, known_nodes, I, T, M):
 # Surprisingly, there is no XOR operation for bytearrays, so this has to been done this way.
 # See : https://bugs.python.org/issue19251
 def xor(a,b):
-    return bytes(x ^ y for x, y in zip(a,b))
+    # ensure that len(a) >= len(b)
+    if len(a) < len(b):
+        a, b = b, a
+    return bytes(x ^ y for x, y in zip(a, b'\x00' * (len(a) - len(b)) + b))
 
 
-def compute_Y(I, X, T, L, S, N, PSI, byte_order='big'):
-    # Build array Y of length L+1
-    Y = [None]*(L+1)
+def compute_Y(I, X, T, L, S, N, Psi, byte_order='big'):
+    # build array Y of length L+1
+    Y = [None] * (L+1)
 
-    # Initialization
-    Y[0] = H(S, N + PSI + I)
+    # initialization
+    Y[0] = H(S, N + Psi + I)
 
-    # Building the array
-    i = [None]*L
+    # building the array
+    i = [None] * L
     for j in range(1, L+1):
         # Step 5.a
+        # ??? a full modulo is expensive for non 2**
+        # should it rather be on a few bytes?
         i[j-1] = int.from_bytes(Y[j-1], byte_order) % T
         # Step 5.b
         Y[j] = H(S, Y[j-1] + xor(X[i[j-1]], I))
 
-    # computing OMEGA
-    if len(Y)%2==1:
-        OMEGA_input = b''.join(Y[:0:-1])
-    else:
-        OMEGA_input = b''.join(Y[::-1])
-    OMEGA = H(S, OMEGA_input)
+    # Compute final Omega
+    Omega = H(S, xor(b''.join(Y[:0:-1] if len(Y) % 2 == 1 else Y[::-1]), I))
 
-    return Y, OMEGA, i
+    return Y, Omega, i
 
 def is_PoW_solved(d, x, S=S):
     assert len(x) == S
