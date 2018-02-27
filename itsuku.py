@@ -9,11 +9,10 @@ from opening import openingForOneArray as opening
 from collections import OrderedDict
 # TODO : consider adding typing (import typing)
 
-
 n = 4 # number of dependencies
-T = 2**5 # length of the main array
+T = 2**5 # length of the main array, non power of 2 should be allowed
 x = 64 # size of elements in the main array
-M = 64 # size of elements in the Merkel Tree 
+M = 64 # size of elements in the Merkel Tree
 S = 64 # size of elements of Y
 L = 9 # length of one search
 d = b'\x00'*(S-1) + b'\xff' # PoW difficulty (or strength)
@@ -22,26 +21,27 @@ l = 2**5
 P = T/l # number of independent sequences
 I = os.urandom(M) # initial challenge (randomly generated M bytes array)
 
-HASH = "sha512" # hash function
+HASH = 'sha512' # hash function
 
-
+# compute the Argon2 phi function
 def phi(seed, i, byte_order='big', method='high-level'):
     # Will only work as expected if the seed is 4 bytes long
     assert len(seed) == 4
 
     J = int.from_bytes(seed, byte_order)
     R = i-1
-    
-    if method=='high-level':
+
+    if method == 'high-level':
         res = R*(1-((J*J)//(2**64)))
     else:
-        # We are using the operations suggested at page 7 in https://www.cryptolux.org/images/0/0d/Argon2.pdf
+        # operations page 7 in https://www.cryptolux.org/images/0/0d/Argon2.pdf
         x = (J**2)//(2**32)
         y = ((i-1)*x)//(2**32)
         res = i - 1 - y
-    
+
     return res
 
+# list of phi functions, used up to n (number of dependencies)
 PHI_K = [
     lambda i, pi: i-1,
     lambda i, pi: pi,
@@ -56,57 +56,67 @@ PHI_K = [
     lambda i, pi: i*7//8
 ]
 
-def phis(seed,i,n):
-    assert n>=1 and n<=11
+# return all X[i] dependencies as a set of indexes
+def phis(seed, i, n):
+    assert type(seed) == bytes
+    assert 1 <= n and n <= len(PHI_K)
     phi_i = phi(seed, i)
     return [ phi(i, phi_i) for phi in PHI_K[:n] ]
 
-def H(M,x,method=HASH):
+# return a M bytes hash of x
+def H(M, x, method=HASH):
+    # manual type check:-)
+    assert type(M) == bytes and types(x) == bytes
     # Encapsulate hashing operations such as digest, update ... for better readability
-    
-    if method == "sha512":
-        hashfunc = sha512() # it is important that a new hash function is instanciated every time
-                            # otherwise, the output would depend on the previous inputs ...
-        hashfunc.update(x)
-        output = hashfunc.digest()
-        return output[:M]
+    if method == 'sha512':
+        h = sha512()
+        h.update(x)
+        return h.digest()[:M]
+    else:
+        raise Exception("unexpected hash '%s'" % method)
 
 # TODO: implement function F
 
-# Turns the int 1024 into the byte string b'\x00\x00\x04\x00', that is fit for hashing
+# return int n as a 4 byte string, for hashing purposes
 def int_to_4bytes(n):
+    assert type(n) == int
     return struct.pack('>I', n)
 
-def memory_build(I, T, n, P, x, M): 
-    X = [None]*T
+# build and return array X
+# ??? this probably does not work if T is not a 2**.
+def memory_build(I, T, n, P, x):
+    X = [None] * T
+    # ??? we should provide l, and expect l * P >= T
+    l = T // P
+    # ??? particular case
+    assert float(l) == T / P
 
-    l = T//P
-    assert float(l) == T/P
-
+    # parallel segments
     for p in range(P):
-        # Step 1.a. : Building initial elements out of i, p and I
+
+        # Step 1.a: build initial elements out of i, p and I
         for i in range(n):
             X[p*l+i] = H(x, int_to_4bytes(i) + int_to_4bytes(p) + I)
 
-        # Step 1.b. : Building elements that depend on antecedents using phi functions
+        # Step 1.b: build elements that depend on antecedents using phi functions
         for i in range(n, l):
-            
-            # Building the input
             seed = X[p*l + i-1][:4]
-            hash_input = b''
+            hinput = b''
+            # ??? this is a simplified version
             for phi_k_i in phis(seed, i, n):
-                hash_input += X[p*l + phi_k_i]
+                hinput += X[p*l + phi_k_i]
 
-            X[p*l+i] = H(x, hash_input)
+            X[p*l+i] = H(x, hinput)
 
     return X
 
+# build merkle tree
 def merkle_tree(I, X, M):
     T = len(X)
 
-    # Step 2.a. : Building array repreetig Merkle-tree
-    B = [None]*(2*T-1)
-    
+    # Step 2.a. : build Merkle-tree as an array
+    B = [None] * (2*T-1)
+
     # Step 2.b. : Compute leaf elements out of hashes of X
     for i in range(T):
         B[i + T - 1] =  H(M, X[i] + I)
@@ -128,10 +138,10 @@ def compute_merkle_tree_node(index, known_nodes, I, T, M):
     if index in known_nodes:
         return known_nodes[index]
     else:
-        return H(M, 
+        return H(M,
                 compute_merkle_tree_node(2*index+1, known_nodes, I, T, M) +
                 compute_merkle_tree_node(2*index+2, known_nodes, I, T, M) + I )
-           
+
 
 # Surprisingly, there is no XOR operation for bytearrays, so this has to been done this way.
 # See : https://bugs.python.org/issue19251
@@ -145,7 +155,7 @@ def compute_Y(I, X, T, L, S, N, PSI, byte_order='big'):
 
     # Initialization
     Y[0] = H(S, N + PSI + I)
-    
+
     # Building the array
     i = [None]*L
     for j in range(1, L+1):
@@ -160,7 +170,7 @@ def compute_Y(I, X, T, L, S, N, PSI, byte_order='big'):
     else:
         OMEGA_input = b''.join(Y[::-1])
     OMEGA = H(S, OMEGA_input)
-   
+
     return Y, OMEGA, i
 
 def is_PoW_solved(d, x, S=S):
@@ -171,14 +181,14 @@ def is_PoW_solved(d, x, S=S):
 
 def build_L(i, X, P, n):
     round_L = OrderedDict.fromkeys(i) # will associate each index with the corresponding leaf and antecedent leaves
-    
+
     # computing l
     l = len(X)//P
     assert l == floor(len(X)//P)
 
     for i_j in round_L:
         p = i_j // l
-        
+
         if i_j % l < n:
             # i[j] is such that X[i[j]] was built at step 1.a
             round_L[i_j] = X[p*l:p*l+n]
@@ -186,12 +196,12 @@ def build_L(i, X, P, n):
             # i[j] is such that X[i[j]] was built at step 1.b
             seed = X[i_j-1][:4]
             round_L[i_j] = [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i_j%l , n) ]
-    
+
     return round_L
 
 
 # Given a round_L object, such as the one that is returned at the end of the Itsuku PoW,
-# this function computes the list of the indexes of all the element 
+# this function computes the list of the indexes of all the element
 # of the corresponding array X that are known and stored in round_L
 #
 # Computing this information turns out to be necessary before computing the opening of a merkle tree.
@@ -201,26 +211,23 @@ def provided_indexes(round_L, P, T, n):
     assert l == floor(T/P)
 
     res = list(round_L.keys())
-    
+
     for i_j in round_L :
 
         p = i_j // l
 
         if i_j % l < n :
             # Case when round_L[i_j] items have been built at step (1.a)
-            
             res += range(p*l, p*l+n)
         else :
             # Case when round_L[i_j] items have been built at step (1.b)
-            
             seed = round_L[i_j][0][:4]
-            
             res += [p*l + phi_k_i for phi_k_i in phis(seed, i_j % l, n) ] + [i_j]
             # One may say that adding i_j to the list is wrong because round_L does
             # not encapsulate X[i_j]. Whereas it is true that X[i_j] is not witholded
             # by round_L, X[i_j] can be recomputed from the elements of round_L,
             # thus making it an element which can be considered as known if round_L is known
-    
+
     # This is intended to remove the likely duplicates
     # It turns out it is the fastest way to achieve deduplication
     res = list(dict.fromkeys(res))
@@ -228,11 +235,8 @@ def provided_indexes(round_L, P, T, n):
     return res
 
 def build_Z(round_L, MT, P, T, n):
-
     indexes = provided_indexes(round_L, P, T, n)
-
     opening_indexes = opening(T, indexes)
-
     Z = dict.fromkeys(opening_indexes)
     for k in Z :
         Z[k] = MT[k]
@@ -243,16 +247,15 @@ def clean_Z(Z):
     return  { k: v.hex() for k,v in Z.items() }
 
 def trim_round_L(round_L, P, T, n):
-    
     l = T//P
     assert l == T/P
 
     # Only keeping elements built a step 1.b, since elements
     # built at step 1.a can be recomputed knowing only I
-    # Also, converting the bytearray elements of X to a format 
+    # Also, converting the bytearray elements of X to a format
     # that can be JSON-serialized
     trimmed_round_L = OrderedDict.fromkeys(round_L.keys())
-    
+
     for k in trimmed_round_L:
         if k % l >= n:
             trimmed_round_L[k]= [ item.hex() for item in round_L[k] ]
@@ -263,12 +266,10 @@ def trim_round_L(round_L, P, T, n):
 
 def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, x, d):
     data = {'answer':{}, 'params':{}}
-    
     data['answer']['N'] = N.hex()
     data['answer']['round_L'] = trim_round_L(round_L, P, T, n)
     data['answer']['Z'] = clean_Z(Z)
     # no need to add i to the data because it can be obtain by extracting the keys of round_L
-    
     data['params']['n'] = n
     data['params']['P'] = P
     data['params']['T'] = T
@@ -285,12 +286,10 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, x, d):
 def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=False):
     X = memory_build(I, T, n, P, x, M)
     MT = merkle_tree(I, X, M)
-    
     PSI = MT[0]
-    
-    # Choosing a nonce
+
+    # Choosing a nonce. Could be a counter.
     N = os.urandom(32)
-   
 
     Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
     counter = 0
@@ -303,7 +302,7 @@ def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=False):
             print("attempt n°"+str(counter))
 
     print("success on attempt #" + str(counter))
-    
+
     round_L = build_L(i, X, P, n)
     Z = build_Z(round_L, MT, P, T, n)
 
