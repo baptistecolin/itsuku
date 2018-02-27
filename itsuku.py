@@ -62,7 +62,7 @@ def phis(seed, i, n):
 # return a M bytes hash of x
 def H(M, x, method=HASH):
     # manual type check:-)
-    assert type(M) == bytes and types(x) == bytes
+    assert type(M) == int and type(x) == bytes
     # Encapsulate hashing operations such as digest, update ... for better readability
     if method == 'sha512':
         h = sha512()
