@@ -8,7 +8,7 @@ def opening(T, leaves):
     res = []
     from math import log2
     height = int(log2(T)) + 1
-    
+
     # Managing the leaves == [] case, since the reste of the algorithm
     # wouldn't output [] which is incorrect
     if len(leaves) == 0:
@@ -42,11 +42,6 @@ def opening(T, leaves):
         currentNode = 0
     return res
 
-# with the same arguments, returns the list of the indexes to provide with the leaves if the Merkle Tree is stored as in the 'merkle_tree' function
-def openingForOneArray(T, leaves):
-    nodes = opening(T, leaves)
-    return list(map(lambda node : 2 ** node[0] - 1 + node[1], nodes))
-
 def opening_2(T, leaves):
     res = []
     from math import log2
@@ -72,3 +67,10 @@ def opening_2(T, leaves):
         currentHeight -= 1
         nodes = parentNodes.copy()
     return res
+
+
+# with the same arguments, returns the list of the indexes to provide with the leaves if the Merkle Tree is stored as in the 'merkle_tree' function
+def openingForOneArray(T, leaves):
+    #nodes = opening(T, leaves)
+    nodes = opening_2(T, leaves)
+    return list(map(lambda node : 2 ** node[0] - 1 + node[1], nodes))
