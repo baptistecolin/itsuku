@@ -43,14 +43,14 @@ def test_H():
     x = int_to_4bytes(123456)
     for i in range(1,15):
         assert len(H(i,x)) == i # TODO : check 0<
-    
+
     # the H function should output the last M bytes of the sha512 hash of i
     for i in range(1,15):
         sha = sha512() # resetting the sha function
         sha_input = int_to_4bytes(i)
         sha.update(sha_input)
         assert sha.digest()[:10] == H(10,sha_input)
-        
+
 
 
 def test_int_to_4bytes():
@@ -62,14 +62,14 @@ def test_int_to_4bytes():
     assert len(int_to_4bytes(4294967295)) == 4
     assert isinstance(int_to_4bytes(0), bytes)
 
-    # it should return the expected hex bytes string, in a big endian order 
+    # it should return the expected hex bytes string, in a big endian order
     assert int_to_4bytes(0) == b"\x00\x00\x00\x00"
     assert int_to_4bytes(1) == b"\x00\x00\x00\x01"
     assert int_to_4bytes(2) == b"\x00\x00\x00\x02"
     assert int_to_4bytes(16) == b"\x00\x00\x00\x10"
     assert int_to_4bytes(256) == b"\x00\x00\x01\x00"
 
-def test_memory_build():
+def test_build_X():
     M = 64
     x = 32
     T = 2**5
@@ -78,7 +78,7 @@ def test_memory_build():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # it should work for different values of n. n can't get bigger than l, otherwise the n "seeds" cannot fit in a slice
-            X = memory_build(I, T, n, P, x, M)
+            X = build_X(I, T, l, n, x, M)
 
             # Initialization steps
             for p in range(P):
@@ -89,9 +89,9 @@ def test_memory_build():
             # Construction steps
             for p in range(P):
                 for i in range(n,l):
-                    seed = X[p*l+i-1][:4] # seed that is used at each step is the 
+                    seed = X[p*l+i-1][:4] # seed that is used at each step is the
                                           # 4 first bytes of the previous array item
-                    
+
                     # asserting that the 0<=phi_k(i)<i condition is actually verified
                     phi_k = phis(seed,i,n)
                     for phi_k_i in phi_k:
@@ -101,24 +101,24 @@ def test_memory_build():
                     hash_input = b""
                     for phi_k_i in phi_k:
                         hash_input += X[p*l+phi_k_i]
-                    
+
                     # asserting the validity of the constructed item
                     assert X[p*l+i] == H(x, hash_input)
 
-def test_merkle_tree():
+def test_build_MT():
     M = 64
     x = 32
     T = 2**5
     n = 2
     I = os.urandom(M)
-    
+
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, x, M)
-            
-            MT = merkle_tree(I, X, M)
-    
+            X = build_X(I, T, n, P, x, M)
+
+            MT = build_MT(I, X, M)
+
             # asserting the length is 2*T-1
             assert len(MT) == 2*T-1
             # asserting the end of the MT is actually the hashed original array
@@ -126,12 +126,12 @@ def test_merkle_tree():
             # asserting the constructed items are the hash of their sons
             for i in range(T-1):
                 assert MT[i] == H(M, MT[2*i+1]+MT[2*i+2]+I)
-        
+
         # test on a particular case : if the initial array is constant,
         # then each "floor" of the merkle tree should be constant
         X0 = [int_to_4bytes(0)]*T
-        MT0 = merkle_tree(I, X0, M)
-    
+        MT0 = build_MT(I, X0, M)
+
         # iterating over the floors
         for i in range(1,int(log(T,2))):
             #remembering the value that we expect to find all over the floor
@@ -140,31 +140,31 @@ def test_merkle_tree():
             for j in range((2**i)-1, (2**(i-1))-2):
                 assert MT0[i] == value
 
-def test_compute_merkle_tree_node():
+def test_compute_MT_node():
     M = 64
     x = 32
     I = os.urandom(M)
 
     # basic examples
-    assert compute_merkle_tree_node(0, {0: b'\x00'*64}, I, 1, M) == b'\x00'*64
-    assert compute_merkle_tree_node(0, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, H(64, b'\x11'*64 + b'\xff'*64 + I) + b'\x00'*64 + I)
-    assert compute_merkle_tree_node(1, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, b'\x11'*64 + b'\xff'*64 + I)
-    assert compute_merkle_tree_node(1, {3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, b'\x11'*64 + b'\xff'*64 + I)
+    assert compute_MT_node(0, {0: b'\x00'*64}, I, 1, M) == b'\x00'*64
+    assert compute_MT_node(0, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, H(64, b'\x11'*64 + b'\xff'*64 + I) + b'\x00'*64 + I)
+    assert compute_MT_node(1, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, b'\x11'*64 + b'\xff'*64 + I)
+    assert compute_MT_node(1, {3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, b'\x11'*64 + b'\xff'*64 + I)
 
     # should be able to compute anything if all nodes are known
     T = 2**5
     n = 2
-    
+
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, x, M)
-            MT = merkle_tree(I, X, M)
+            X = build_X(I, T, n, P, x, M)
+            MT = built_MT(I, X, M)
 
             known_nodes = { i:v for i,v in enumerate(MT) }
 
             for i in range(len(MT)):
-                assert compute_merkle_tree_node(i, known_nodes, I, T, M) == MT[i]
+                assert compute_MT_node(i, known_nodes, I, T, M) == MT[i]
 
             # Now let's try and remove information while remaining computable
             for k in range(T-1):
@@ -172,15 +172,15 @@ def test_compute_merkle_tree_node():
                 for i in range(k+1):
                     # the k first elements of the MT have been removed from known_nodes,
                     # they should be properly computed nonetheless
-                    assert compute_merkle_tree_node(i, known_nodes, I, T, M) == MT[i]
+                    assert compute_MT_node(i, known_nodes, I, T, M) == MT[i]
 
     # should throw an error if it gets outside of the expected bounds
     with pytest.raises(AssertionError):
-        assert compute_merkle_tree_node(1, {0: b'\x00'*64}, I, 1, M) == b'\x00'*64
+        assert compute_MT_node(1, {0: b'\x00'*64}, I, 1, M) == b'\x00'*64
     with pytest.raises(AssertionError):
-        assert compute_merkle_tree_node(7, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, H(64, b'\x11'*64 + b'\xff'*64 + I) + b'\x00'*64 + I)
-    with pytest.raises(AssertionError): 
-        assert compute_merkle_tree_node(1, {0: b'\x00'*64}, I, 2, M) == b'\x00'*64
+        assert compute_MT_node(7, {2: b'\x00'*64, 3: b'\x11'*64, 4: b'\xff'*64}, I, 4, M) == H(64, H(64, b'\x11'*64 + b'\xff'*64 + I) + b'\x00'*64 + I)
+    with pytest.raises(AssertionError):
+        assert compute_MT_node(1, {0: b'\x00'*64}, I, 2, M) == b'\x00'*64
 
 def test_xor():
     assert xor(b"\x00", b"\x00") == b"\x00"
@@ -195,12 +195,12 @@ def test_compute_Y():
     S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-    
+
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, x, M)
-            MT = merkle_tree(I, X, M)
+            X = build_X(I, T, n, P, x, M)
+            MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
 
@@ -235,25 +235,25 @@ def test_build_L():
     S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-     
+
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, x, M)
-            MT = merkle_tree(I, X, M)
+            X = build_X(I, T, n, P, x, M)
+            MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
 
             round_L = build_L(i, X, P, n)
-            
+
             for i_j in i:
                 assert len(round_L[i_j]) == n
                 p = i_j // l
                 if i_j % l < n:
                     # assert correct construction
                     assert round_L[i_j] == X[p*l:p*l+n]
-                    
+
                     # by construct, X[i_j] should be part of round_L[i_j]
                     assert X[i_j] in round_L[i_j]
 
@@ -280,12 +280,12 @@ def test_provided_indexes():
     S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-     
+
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, x, M)
-            MT = merkle_tree(I, X, M)
+            X = build_X(I, T, n, P, x, M)
+            MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
@@ -301,9 +301,9 @@ def test_provided_indexes():
                 # using only the elements of round_L[i_j]. Thus, X[i_j] can and must
                 # be considered as a given if round_L is known
                 assert i_j in indexes
-                
+
                 p = i_j // l
-                
+
                 if i_j % l < n :
                     # case where the elements of round[i_j] were computed at step (1.a)
                     for k in range(p*l, p*l+n):
@@ -318,7 +318,7 @@ def test_provided_indexes():
                     assert seed == X[i_j - 1][:4]
                     for index in [p*l+phi_k_i for phi_k_i in phis(seed, i_j % l, n)]:
                         assert index in indexes
-                
+
             # Asserting there are no duplicates
             assert len(indexes) == len(set(indexes))
 
@@ -329,17 +329,17 @@ def test_build_Z():
     S = 16
     L = ceil(3.3*log(T,2))
     I = os.urandom(M)
-    
+
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = memory_build(I, T, n, P, x, M)
-            MT = merkle_tree(I, X, M)
+            X = build_X(I, T, n, P, x, M)
+            MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
             round_L = build_L(i, X, P, n)
-            
+
             Z = build_Z(round_L, MT, P, T, n)
 
             # A shift has to be applied so the indexes match those of the
@@ -351,7 +351,7 @@ def test_build_Z():
                 assert Z[k] == MT[k]
                 if k >= T-1:
                     assert Z[k] == H( M, X[k-(T-1)]+I )
-            
+
             assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, P, T, n)))
 
 def clean_Z():
@@ -364,7 +364,7 @@ def clean_Z():
 def test_trim_round_L():
     with pytest.raises(AssertionError):
         trim_round_L({}, 5, 2, 0)
-    
+
     # Assert that the intended items are trimmed off of the dict
     round_L_1 = {7: [b'\x00'], 15:[b'\x00']} # should remain unchanged if (P, T, n) = (32, 4, 6)
     round_L_2 = {5: [b'\x00'], 10:[b'\x00']} # should be totally trimmed
@@ -382,9 +382,9 @@ def test_trim_round_L():
 
 def test_build_JSON_output():
     JSON = build_JSON_output(N=b'\x00'*63 + b'\xff', round_L={}, Z={}, P=4, T=32, n='n', I=b'\xff'*64, M='M', L='L', S='S', x='x', d=b'\x00'*64)
-    
+
     data = json.loads(JSON)
-    
+
     assert data['answer']['N'] == '00'*63 + 'ff'
     assert data['answer']['round_L'] == {}
     assert data['answer']['Z'] == {}
@@ -400,7 +400,7 @@ def test_build_JSON_output():
     assert data['params']['d'] == '00'*64
 
 #@pytest.mark.skip(reason="not good yet")
-def test_PoW(): 
+def test_PoW():
     M = 64
     x = 32
     T = 2**4
@@ -411,7 +411,7 @@ def test_PoW():
 
     for P in [1,2,4]:
         l = T//P
-        for n in range(2,min(12,l)): # should work for different values of n 
+        for n in range(2,min(12,l)): # should work for different values of n
             json_output, X_PoW, MT_PoW, PSI_PoW, N_PoW, I_PoW, Y_PoW, OMEGA_PoW, i_PoW, round_L_PoW, Z_PoW = PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=True)
             data = json.loads(json_output, object_pairs_hook=OrderedDict)
 
@@ -424,9 +424,9 @@ def test_PoW():
             assert data['params']['S'] == S
             assert data['params']['x'] == x
             assert data['params']['d'] == d.hex()
-            
+
             # Verifying the answer
-            
+
             N = bytes.fromhex(data['answer']['N'])
             assert N == N_PoW
 
@@ -442,7 +442,7 @@ def test_PoW():
             for k in unprocessed_round_L:
                 round_L[int(k)] = [ bytes.fromhex(x) for x in unprocessed_round_L[k] ]
                 del round_L[k] # the key used to be denoted by a char, and has to go
-            
+
             # assert correct construction
             assert round_L == {k:(v if k%l >= n else []) for k,v in round_L_PoW.items()}
 
@@ -450,7 +450,7 @@ def test_PoW():
             Z = {}
             for k in unprocessed_Z:
                 Z[int(k)] = bytes.fromhex(unprocessed_Z[k])
-            
+
             assert Z == Z_PoW
 
             # Verifications
@@ -460,7 +460,7 @@ def test_PoW():
 
             # Building back X
             X = {}
-            
+
             # First, building back elements that are built at step 1.a., that can be built from scratch
             for p in range(P):
                 for i in range(n):
@@ -477,8 +477,8 @@ def test_PoW():
                         hash_input += round_L[i_j][k]
 
                     # recomputing X[i_j] and adding it
-                    X[i_j] = H(x, hash_input)  
-            
+                    X[i_j] = H(x, hash_input)
+
             # asserting correct reconstruction
             for a,e in X.items():
                 assert X_PoW[a] == e
@@ -488,11 +488,11 @@ def test_PoW():
 
             for index, node in known_nodes.items():
                 assert MT_PoW[index] == node
-            
+
             # Verifications
             assert len(known_nodes) == len(Z) + len(X)
-                
-            PSI = compute_merkle_tree_node(0, known_nodes, I, T, M)
+
+            PSI = compute_MT_node(0, known_nodes, I, T, M)
 
             assert PSI == PSI_PoW
 
@@ -501,7 +501,7 @@ def test_PoW():
 
             assert Y == Y_PoW
             assert OMEGA == OMEGA_PoW
-            
+
             # Verifying the two conditions that define the success of the PoW :
             #
             # 1. OMEGA satisfies the difficulty constraint

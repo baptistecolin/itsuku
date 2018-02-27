@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import os
 import struct
 import json
@@ -8,22 +9,6 @@ from math import floor, ceil, log
 from opening import openingForOneArray as opening
 from collections import OrderedDict
 # TODO : consider adding typing (import typing)
-
-n = 4 # number of dependencies
-T = 2**5 # length of the main array, non power of 2 should be allowed
-x = 64 # size of elements in the main array
-M = 64 # size of elements in the Merkel Tree
-S = 64 # size of elements of Y
-L = 9 # length of one search
-d = b'\x00'*(S-1) + b'\xff' # PoW difficulty (or strength)
-#l = 2**15 # length of segment
-l = 2**5
-P = T/l # number of independent sequences
-I = os.urandom(64) # initial challenge (randomly generated M bytes array)
-
-# needed seed size is 4 bytes
-assert 4 <= x
-assert M <= x
 
 HASH = 'sha512' # hash function
 
@@ -75,44 +60,95 @@ def H(M, x, method=HASH):
     else:
         raise Exception("unexpected hash '%s'" % method)
 
-# TODO: implement function F
+# ??? TODO: implement function F
 
 # return int n as a 4 byte string, for hashing purposes
 def int_to_4bytes(n):
     assert type(n) == int
     return struct.pack('>I', n)
 
+# help, some redundancy
+def _direct_X_i(x, I, p, k, l, n):
+    assert k < n and n <= l
+    return H(x, int_to_4bytes(k) + int_to_4bytes(p) + I)
+
+# ??? FIXME this is not the expected formula
+def _indirect_X_i(x, I, p, k, l, n, X):
+    assert n <= k and k < l
+    i = p*l + k
+    assert ((type(X) is list and i-1 < len(X)) or \
+            (type(X) is dict and i-1 in X)), "i=%d p=%d l=%d k=%d X=%s" % (i, p, l, k, X)
+    seed = X[i-1][:4]
+    data = b''
+    for phi in phis(seed, k, n):
+        assert phi <= i-1 and \
+            ((type(X) is list and p*l+phi < len(X)) or \
+             (type(X) is dict and p*l+phi in X))
+        data += X[p*l+phi]
+    data += I
+    return H(x, data)
+
+# computation of X[i]
+def compute_X_i(x, I, i, l, n):
+    p, k = i // l, i % l
+    if k < n:
+        return _direct_X_i(x, I, p, k, l, n)
+    else:
+        return _indirect_X_i(x, I, p, k, l, n, X)
+
 # build and return array X
 # ??? this probably does not work if T is not a 2**.
-def memory_build(I, T, n, P, x):
+def build_X(I, T, l, n, x):
     X = [None] * T
-    # ??? we should provide l, and expect l * P >= T
-    l = T // P
+    P = (T + (l - 1)) // l
     # ??? particular case
-    assert float(l) == T / P
-
+    #assert float(l) == T / P
     # parallel segments
     for p in range(P):
 
         # Step 1.a: build initial elements out of i, p and I
-        for i in range(n):
-            X[p*l+i] = H(x, int_to_4bytes(i) + int_to_4bytes(p) + I)
+        for k in range(n):
+            X[p*l+k] = _direct_X_i(x, I, p, k, l, n)
 
         # Step 1.b: build elements that depend on antecedents using phi functions
-        for i in range(n, l):
-            seed = X[p*l + i-1][:4]
-
-            # ??? this is a simplified version
-            hinput = b''
-            for phi_k_i in phis(seed, i, n):
-                hinput += X[p*l + phi_k_i]
-
-            X[p*l+i] = H(x, hinput)
+        for k in range(n, l):
+            X[p*l+k] = _indirect_X_i(x, I, p, k, l, n, X)
 
     return X
 
+
+# rebuild a partial X
+def rebuild_X(rL, I, l, n, x):
+    X = {}
+    for i, xs in rL.items():
+        p, k = i // l, i % l
+        if k < n:
+            X_i = _direct_X_i(x, I, p, k, l, n)
+        else:
+            assert type(xs) is list
+            seed = xs[0][:4]
+            for j, v in zip(phis(seed, k, n), xs):
+                if p*l+j in X:
+                    assert X[p*l+j] == v
+                else:
+                    X[p*l+j] = v
+            X_i = _indirect_X_i(x, I, p, k, l, n, X)
+        if i in X:
+            assert X[i] == X_i
+        else:
+            X[i] = X_i
+    #print("nX=%s" % { k:v.hex() for k,v in X.items() })
+    return X
+
+def _cmp_MT_leaf(I, Xi, M):
+    return H(M, Xi + I)
+
+def _cmp_MT_node(I, X1, X2, M):
+    return H(M, X1 + X2 + I)
+
 # build merkle tree
-def merkle_tree(I, X, M):
+# ??? TODO should work for non 2**
+def build_MT(I, X, M):
     T = len(X)
 
     # Step 2.a. : build Merkle-tree as an array
@@ -120,12 +156,36 @@ def merkle_tree(I, X, M):
 
     # Step 2.b. : Compute leaf elements out of hashes of X
     for i in range(T):
-        B[i + T - 1] =  H(M, X[i] + I)
+        B[i + T - 1] = _cmp_MT_leaf(I, X[i], M)
 
     # Step 2.c. : Compute intermediate elements as hashes of their sons
     for i in range(T-2, -1, -1): # Downward iteration from T-2 to 0, both included
-        B[i] = H(M, B[2*i+1] + B[2*i+2] + I )
+        B[i] = _cmp_MT_node(I, B[2*i+1], B[2*i+2], M)
 
+    return B
+
+# sigh... this should be in Python
+from sortedcontainers import SortedSet
+
+# rebuild partial Merkle Tree from available informations
+# this is a bottom-up version of recursive "compute_MT_node",
+# which checks that all values are used as expected
+def rebuild_MT(rZ, I, X, M, T):
+    B = {}
+    for i, v in X.items():
+        B[i + T - 1] = _cmp_MT_leaf(I, v, M)
+    for i, v in rZ.items():
+        assert i not in B
+        B[i] = v
+    indexes = SortedSet(B.keys())
+    while len(indexes) >= 2:
+        i2, i1 = indexes.pop(), indexes.pop()
+        assert i1 + 1 == i2 and i2 % 2 == 0
+        i0 = i1 // 2
+        assert not i0 in indexes
+        indexes.add(i0)
+        B[i0] = _cmp_MT_node(I, B[i1], B[i2], M)
+    assert len(indexes) == 1 and indexes.pop() == 0
     return B
 
 # Let's use a recursive function !
@@ -134,15 +194,14 @@ def merkle_tree(I, X, M):
 #               where 0 <= i < 2T-1 is the index of the node in the array representation of the tree
 #               and b is the hash stored in the corresponding node
 # index = index in the array representation of the MT of the hash we want to compute
-def compute_merkle_tree_node(index, known_nodes, I, T, M):
+def compute_MT_node(index, known_nodes, I, T, M):
     assert index < 2*T-1 , "Out of bound index : %i" % index
     if index in known_nodes:
         return known_nodes[index]
     else:
         return H(M,
-                compute_merkle_tree_node(2*index+1, known_nodes, I, T, M) +
-                compute_merkle_tree_node(2*index+2, known_nodes, I, T, M) + I )
-
+                compute_MT_node(2*index+1, known_nodes, I, T, M) +
+                compute_MT_node(2*index+2, known_nodes, I, T, M) + I )
 
 # Surprisingly, there is no XOR operation for bytearrays, so this has to been done this way.
 # See : https://bugs.python.org/issue19251
@@ -152,7 +211,8 @@ def xor(a,b):
         a, b = b, a
     return bytes(x ^ y for x, y in zip(a, b'\x00' * (len(a) - len(b)) + b))
 
-
+# compute the Y sequence from nonce and other stuff
+# X maybe a full or partial array
 def compute_Y(I, X, T, L, S, N, Psi, byte_order='big'):
     # build array Y of length L+1
     Y = [None] * (L+1)
@@ -160,7 +220,7 @@ def compute_Y(I, X, T, L, S, N, Psi, byte_order='big'):
     # initialization
     Y[0] = H(S, N + Psi + I)
 
-    # building the array
+    # build array Y and keep used X indexes
     i = [None] * L
     for j in range(1, L+1):
         # Step 5.a
@@ -175,31 +235,40 @@ def compute_Y(I, X, T, L, S, N, Psi, byte_order='big'):
 
     return Y, Omega, i
 
-def is_PoW_solved(d, x, S=S):
-    assert len(x) == S
-    assert len(d) == S
-    # using the lexicographic order
+# check PoW solution wrt expected difficulty
+def is_PoW_solved(d, x, S):
+    assert len(x) == S and len(d) == S
+    # lexicographic order
     return x > d
 
-def build_L(i, X, P, n):
-    round_L = OrderedDict.fromkeys(i) # will associate each index with the corresponding leaf and antecedent leaves
+# debug helper
+def print_rL(name, rL, l, n):
+    print("%s = {" % name)
+    for i, v in rL.items():
+        if type(v) is list:
+            print("  %d:%s," % (i, [x.hex() for x in v]))
+        else:
+            print("  %d:'%s'," % (i, v.hex()))
+    print("}")
 
-    # computing l
-    l = len(X)//P
-    assert l == floor(len(X)//P)
-
-    for i_j in round_L:
-        p = i_j // l
-
-        if i_j % l < n:
+# return the roundL structure
+# which maps selected indexes with their antecedents value in X so that they can be recomputed
+def build_rL(rI, X, l, n):
+    rL = {}
+    for ij in rI:
+        p, k = ij // l, ij % l
+        if k < n:
             # i[j] is such that X[i[j]] was built at step 1.a
-            round_L[i_j] = X[p*l:p*l+n]
+            # ??? useless, can be recomputed
+            #round_L[ij] = X[ij]
+            rL[ij] = []
         else :
             # i[j] is such that X[i[j]] was built at step 1.b
-            seed = X[i_j-1][:4]
-            round_L[i_j] = [ X[p*l + phi_k_i] for phi_k_i in phis(seed, i_j%l , n) ]
+            seed = X[ij-1][:4]
+            # ??? we could skip those which can be recomputed?
+            rL[ij] = [ X[p*l + phi] for phi in phis(seed, k, n) ]
 
-    return round_L
+    return rL
 
 
 # Given a round_L object, such as the one that is returned at the end of the Itsuku PoW,
@@ -208,46 +277,30 @@ def build_L(i, X, P, n):
 #
 # Computing this information turns out to be necessary before computing the opening of a merkle tree.
 
-def provided_indexes(round_L, P, T, n):
-    l = T//P
-    assert l == floor(T/P)
-
-    res = list(round_L.keys())
-
-    for i_j in round_L :
-
-        p = i_j // l
-
-        if i_j % l < n :
-            # Case when round_L[i_j] items have been built at step (1.a)
-            res += range(p*l, p*l+n)
-        else :
+# returns the set of indexes provided directly or indirectly with in roundL
+def get_provided_indexes(rL, T, l, n):
+    res = set()
+    for i in rL:
+        p, k = i // l, i % l
+        res.add(i)
+        if k >= n:
             # Case when round_L[i_j] items have been built at step (1.b)
-            seed = round_L[i_j][0][:4]
-            res += [p*l + phi_k_i for phi_k_i in phis(seed, i_j % l, n) ] + [i_j]
-            # One may say that adding i_j to the list is wrong because round_L does
-            # not encapsulate X[i_j]. Whereas it is true that X[i_j] is not witholded
-            # by round_L, X[i_j] can be recomputed from the elements of round_L,
-            # thus making it an element which can be considered as known if round_L is known
-
-    # This is intended to remove the likely duplicates
-    # It turns out it is the fastest way to achieve deduplication
-    res = list(dict.fromkeys(res))
-
+            seed = rL[i][0][:4]
+            # argh, union is a function...
+            res = res.union((p*l + phi) for phi in phis(seed, k, n))
     return res
 
-def build_Z(round_L, MT, P, T, n):
-    indexes = provided_indexes(round_L, P, T, n)
-    opening_indexes = opening(T, indexes)
-    Z = dict.fromkeys(opening_indexes)
-    for k in Z :
-        Z[k] = MT[k]
+def build_rZ(rL, MT, T, l, n):
+    rZ = {}
+    for k in opening(T, get_provided_indexes(rL, T, l, n)):
+        rZ[k] = MT[k]
+    return rZ
 
-    return Z
-
+# ???
 def clean_Z(Z):
-    return  { k: v.hex() for k,v in Z.items() }
+    return { k: v.hex() for k,v in Z.items() }
 
+# ???
 def trim_round_L(round_L, P, T, n):
     l = T//P
     assert l == T/P
@@ -266,16 +319,20 @@ def trim_round_L(round_L, P, T, n):
 
     return trimmed_round_L
 
+# full version
 def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, x, d):
     data = {'answer':{}, 'params':{}}
+    # needed PoW
     data['answer']['N'] = N.hex()
-    data['answer']['round_L'] = trim_round_L(round_L, P, T, n)
+    data['answer']['rL'] = trim_round_L(round_L, P, T, n)
     data['answer']['Z'] = clean_Z(Z)
     # no need to add i to the data because it can be obtain by extracting the keys of round_L
-    data['params']['n'] = n
-    data['params']['P'] = P
-    data['params']['T'] = T
+    # informational
     data['params']['I'] = I.hex()
+    data['params']['T'] = T # P * l <= T
+    data['params']['P'] = P
+    data['params']['l'] = l
+    data['params']['n'] = n
     data['params']['M'] = M
     data['params']['L'] = L
     data['params']['S'] = S
@@ -284,45 +341,63 @@ def build_JSON_output(N, round_L, Z, P, T, n, I, M, L, S, x, d):
 
     return json.dumps(data, separators=(',',':'))
 
+# minimal json export
+def exportPoW(N, rL, rZ):
+    data = {
+        'N': N.hex(),
+        'L': { i: [ j.hex() for j in v ] for i, v in rL.items() },
+        'Z': { i: v.hex() for i, v in rZ.items() }
+    }
+    return json.dumps(data)
 
-def PoW(I=I, T=T, n=n, P=P, M=M, L=L, S=S, x=x, d=d, debug=False):
-    X = memory_build(I, T, n, P, x, M)
-    MT = merkle_tree(I, X, M)
-    PSI = MT[0]
+# reverse of exportPoW
+def importPoW(s):
+    data = json.loads(s)
+    N = bytes.fromhex(data['N'])
+    rL = { int(i): [ bytes.fromhex(j) for j in v ] for i, v in data['L'].items() }
+    rZ = { int(i): bytes.fromhex(v) for i, v in data['Z'].items() }
+    return N, rL, rZ
 
-    # Choosing a nonce. Could be a counter.
-    N = os.urandom(32)
-
-    Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
+# nonce size?
+def solvePoW(I, T, l, n, M, L, S, x, d):
+    X = build_X(I, T, l, n, x)
+    B = build_MT(I, X, M)
+    Psi = B[0]
     counter = 0
-    while not(is_PoW_solved(d, OMEGA, S)):
-        N = os.urandom(32) # Choosing a new nonce
-        Y, OMEGA, i = compute_Y(I,X,T,L,S,N,PSI)
-
+    while True:
         counter += 1
-        if counter % 25 == 0:
-            print("attempt n°"+str(counter))
+        # Choose nonce, could be a counter.
+        N = os.urandom(8)
+        Y, Omega, rI = compute_Y(I, X, T, L, S, N, Psi)
+        # sigh, Python is still missing a do/while loop
+        if Omega < d:
+            break
+    rL = build_rL(rI, X, l, n)
+    rZ = build_rZ(rL, B, T, l, n)
+    return exportPoW(N, rL, rZ), Omega, counter
 
-    print("success on attempt #" + str(counter))
+def checkPoW(I, T, l, n, M, L, S, x, d, json_in):
+    nN, nrL, nrZ = importPoW(json_in)
+    nX = rebuild_X(nrL, I, l, n, x)
+    nB = rebuild_MT(nrZ, I, nX, M, T)
+    nPsi = nB[0]
+    nY, nOmega, nrI = compute_Y(I, nX, T, L, S, nN, nPsi)
+    return nOmega < d, nOmega
 
-    round_L = build_L(i, X, P, n)
-    Z = build_Z(round_L, MT, P, T, n)
+# UNUSED
+# test values?
+n = 4 # number of dependencies
+T = 2**5 # length of the main array, non power of 2 should be allowed
+x = 64 # size of elements in the main array
+M = 64 # size of elements in the Merkel Tree
+S = 64 # size of elements of Y
+L = 9 # length of one search
+d = b'\x00' + b'\xff' * (S-1) # PoW difficulty (or strength)
+#l = 2**15 # length of segment
+l = 2**5
+P = T/l # number of independent sequences
+I = os.urandom(64) # initial challenge (randomly generated M bytes array)
 
-    json_output = build_JSON_output(
-            N=N,
-            round_L=round_L,
-            Z=Z,
-            P=P,
-            T=T,
-            n=n,
-            I=I,
-            M=M,
-            L=L,
-            S=S,
-            x=x,
-            d=d
-        )
-    if debug:
-        return json_output, X, MT, PSI, N, I, Y, OMEGA, i, round_L, Z
-    else:
-        return json_output
+# needed seed size is 4 bytes
+assert 4 <= x
+assert M <= x
