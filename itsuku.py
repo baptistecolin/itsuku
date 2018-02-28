@@ -77,7 +77,7 @@ def _indirect_X_i(x, I, p, k, l, n, X):
     assert n <= k and k < l
     i = p*l + k
     assert ((type(X) is list and i-1 < len(X)) or \
-            (type(X) is dict and i-1 in X)), "i=%d p=%d l=%d k=%d X=%s" % (i, p, l, k, X)
+            (type(X) is dict and i-1 in X))
     seed = X[i-1][:4]
     data = b''
     for phi in phis(seed, k, n):
