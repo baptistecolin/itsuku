@@ -159,7 +159,7 @@ def test_compute_MT_node():
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
             X = build_X(I, T, n, P, x)
-            MT = built_MT(I, X, M)
+            MT = build_MT(I, X, M)
 
             known_nodes = { i:v for i,v in enumerate(MT) }
 
@@ -245,7 +245,7 @@ def test_build_L():
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
 
-            round_L = build_L(i, X, P, n)
+            round_L = build_rL(i, X, P, n)
 
             for i_j in i:
                 assert len(round_L[i_j]) == n
@@ -289,7 +289,7 @@ def test_provided_indexes():
             PSI = MT[0]
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
-            round_L = build_L(i, X, P, n)
+            round_L = build_rL(i, X, P, n)
 
             indexes = provided_indexes(round_L, P, T, n)
 
@@ -322,7 +322,7 @@ def test_provided_indexes():
             # Asserting there are no duplicates
             assert len(indexes) == len(set(indexes))
 
-def test_build_Z():
+def test_build_rZ():
     M = 64
     x = 32
     T = 2**5
@@ -338,9 +338,9 @@ def test_build_Z():
             PSI = MT[0]
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
-            round_L = build_L(i, X, P, n)
+            round_L = build_rL(i, X, P, n)
 
-            Z = build_Z(round_L, MT, P, T, n)
+            Z = build_rZ(round_L, MT, P, T, n)
 
             # A shift has to be applied so the indexes match those of the
             # Merkle Tree and not those of X.
