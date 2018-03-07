@@ -46,6 +46,12 @@ def opening_2(T, leaves):
     res = []
     from math import log2
     height = int(log2(T)) + 1
+    
+    # Managing the leaves == [] case, since the reste of the algorithm
+    # wouldn't output [] which is incorrect
+    if len(leaves) == 0:
+        return [ (height-1, t) for t in range(T) ]
+    
     currentHeight = height - 2
     numberOfNodes = T
     nodes = sorted(leaves)
