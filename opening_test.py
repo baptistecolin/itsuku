@@ -1,5 +1,5 @@
 from opening import *
-from itsuku import compute_merkle_tree_node
+from itsuku import compute_MT_node
 from math import log2
 import pytest
 import os
