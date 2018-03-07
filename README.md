@@ -1,6 +1,8 @@
 ## Dependencies
 
-None ... for the moment
+```bash
+pip install sortedcontainers
+```
 
 ## Tests
 
