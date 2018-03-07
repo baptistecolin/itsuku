@@ -78,7 +78,7 @@ def test_build_X():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # it should work for different values of n. n can't get bigger than l, otherwise the n "seeds" cannot fit in a slice
-            X = build_X(I, T, l, n, x, M)
+            X = build_X(I, T, l, n, x)
 
             # Initialization steps
             for p in range(P):
@@ -115,7 +115,7 @@ def test_build_MT():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x, M)
+            X = build_X(I, T, n, P, x)
 
             MT = build_MT(I, X, M)
 
@@ -158,7 +158,7 @@ def test_compute_MT_node():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x, M)
+            X = build_X(I, T, n, P, x)
             MT = built_MT(I, X, M)
 
             known_nodes = { i:v for i,v in enumerate(MT) }
@@ -199,7 +199,7 @@ def test_compute_Y():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x, M)
+            X = build_X(I, T, n, P, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -239,7 +239,7 @@ def test_build_L():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x, M)
+            X = build_X(I, T, n, P, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -284,7 +284,7 @@ def test_provided_indexes():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x, M)
+            X = build_X(I, T, n, P, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -333,7 +333,7 @@ def test_build_Z():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x, M)
+            X = build_X(I, T, n, P, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
