@@ -217,18 +217,18 @@ def test_compute_Y():
                 assert Y[j] == H(S, Y[j-1] + xor(X[i[j-1]], I))
 
 def test_is_PoW_solved():
-    assert is_PoW_solved(b'\x00'*64, b'\x00'*63 + b'\x01') == True
-    assert is_PoW_solved(b'\x00'*64, b'\x00'*64) == False
-    assert is_PoW_solved(b'\xff'*63 + b'\xfe', b'\xff'*64) == True
+    assert is_PoW_solved(b'\x00'*64, b'\x00'*63 + b'\x01', 64) == True
+    assert is_PoW_solved(b'\x00'*64, b'\x00'*64, 64) == False
+    assert is_PoW_solved(b'\xff'*63 + b'\xfe', b'\xff'*64, 64) == True
 
     with pytest.raises(AssertionError):
-        is_PoW_solved(b'\x00', b'\x00'*64)
+        is_PoW_solved(b'\x00', b'\x00'*64, 64)
     with pytest.raises(AssertionError):
-        is_PoW_solved(b'\x00', b'\x00')
+        is_PoW_solved(b'\x00', b'\x00', 64)
     with pytest.raises(AssertionError):
-        is_PoW_solved(b'\x00'*64, b'\x00')
+        is_PoW_solved(b'\x00'*64, b'\x00', 64)
 
-def test_build_L():
+def test_build_rL():
     M = 64
     x = 32
     T = 2**5
