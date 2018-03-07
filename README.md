@@ -1,7 +1,7 @@
 ## Dependencies
 
 ```bash
-pip install sortedcontainers
+pip3 install sortedcontainers
 ```
 
 ## Tests
