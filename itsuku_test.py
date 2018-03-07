@@ -18,9 +18,9 @@ def test_phi():
         phi(seed_8bytes, 4)
 
     # it should return the same result using the high-level or low level algorithm
-    assert phi(seed, 4, method='high-level') == phi(seed, 4, method='low-level')
-    assert phi(seed, 28, method='high-level') == phi(seed, 28, method='low-level')
-    assert phi(seed, 1024, method='high-level') == phi(seed, 1024, method='low-level')
+    assert phi(seed, 4) == phi(seed, 4)
+    assert phi(seed, 28) == phi(seed, 28)
+    assert phi(seed, 1024) == phi(seed, 1024)
 
     # it should return a value phi(i) inferior to i
     assert phi(seed, 2) < 2
