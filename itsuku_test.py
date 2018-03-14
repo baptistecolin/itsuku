@@ -96,14 +96,14 @@ def test_build_X():
                     phi_k = phis(seed,i,n)
                     for phi_k_i in phi_k:
                         assert phi_k_i < i
-                        assert 0 < phi_k_i
+                        assert 0 <= phi_k_i
 
                     hash_input = b""
                     for phi_k_i in phi_k:
                         hash_input += X[p*l+phi_k_i]
 
                     # asserting the validity of the constructed item
-                    assert X[p*l+i] == H(x, hash_input)
+                    assert X[p*l+i] == H(x, hash_input + I)
 
 def test_build_MT():
     M = 64
