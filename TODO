@@ -1,0 +1,7 @@
+- repair pytest stuff
+- implement for arbitrary T
+- implement F as specified
+- implement in an elegant language: haskell?
+- implement in a low-level language: C? Rust? Other?
+- take advantage of parallelism?
+  threads? CUDA or OpenCL on GPGPU?
