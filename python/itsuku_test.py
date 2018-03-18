@@ -182,7 +182,7 @@ def test_compute_MT_node():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x)
+            X = build_X(I, T, l, n, x)
             MT = build_MT(I, X, M)
 
             known_nodes = { i:v for i,v in enumerate(MT) }
