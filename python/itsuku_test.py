@@ -115,7 +115,7 @@ def test_build_MT():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x)
+            X = build_X(I, T, l, n, x)
 
             MT = build_MT(I, X, M)
 
