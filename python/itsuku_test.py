@@ -223,7 +223,7 @@ def test_compute_Y():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x)
+            X = build_X(I, T, l, n, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -263,7 +263,7 @@ def test_build_rL():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x)
+            X = build_X(I, T, l, n, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -308,7 +308,7 @@ def test_get_provided_indexes():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x)
+            X = build_X(I, T, l, n, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
@@ -357,7 +357,7 @@ def test_build_rZ():
     for P in [1,2,4]:
         l = T//P
         for n in range(2,min(12,l)): # should work for different values of n
-            X = build_X(I, T, n, P, x)
+            X = build_X(I, T, l, n, x)
             MT = build_MT(I, X, M)
             PSI = MT[0]
             N = os.urandom(32) # nounce
