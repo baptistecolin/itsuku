@@ -410,7 +410,7 @@ def test_build_JSON_output():
     data = json.loads(JSON)
 
     assert data['answer']['N'] == '00'*63 + 'ff'
-    assert data['answer']['round_L'] == {}
+    assert data['answer']['rL'] == {}
     assert data['answer']['Z'] == {}
 
     assert data['params']['P'] == 4
