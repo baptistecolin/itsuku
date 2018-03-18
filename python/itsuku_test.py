@@ -69,6 +69,18 @@ def test_int_to_4bytes():
     assert int_to_4bytes(16) == b"\x00\x00\x00\x10"
     assert int_to_4bytes(256) == b"\x00\x00\x01\x00"
 
+@pytest.mark.skip(reason="to be filled")
+def test__direct_X_i():
+    return None
+
+@pytest.mark.skip(reason="to be filled")
+def test__indirect_X_i():
+    return None
+
+@pytest.mark.skip(reason="to be filled")
+def test_compute_X_i():
+    return None
+
 def test_build_X():
     M = 64
     x = 32
@@ -105,6 +117,14 @@ def test_build_X():
                     # asserting the validity of the constructed item
                     assert X[p*l+i] == H(x, hash_input + I)
 
+@pytest.mark.skip(reason="to be filled")
+def test__cmp_MT_leaf():
+    return None
+
+@pytest.mark.skip(reason="to be filled")
+def test__cmp_MT_node():
+    return None
+
 def test_build_MT():
     M = 64
     x = 32
@@ -139,6 +159,10 @@ def test_build_MT():
             # iterating inside the floor
             for j in range((2**i)-1, (2**(i-1))-2):
                 assert MT0[i] == value
+
+@pytest.mark.skip(reason="to be filled")
+def test_rebuild_MT():
+    return None
 
 def test_compute_MT_node():
     M = 64
@@ -273,7 +297,7 @@ def test_build_rL():
                         hash_input += item
                     assert H(x,hash_input) == X[i_j]
 
-def test_provided_indexes():
+def test_get_provided_indexes():
     M = 64
     x = 32
     T = 2**5
@@ -399,7 +423,23 @@ def test_build_JSON_output():
     assert data['params']['x'] == 'x'
     assert data['params']['d'] == '00'*64
 
-#@pytest.mark.skip(reason="not good yet")
+@pytest.mark.skip(reason="to be filled")
+def test_exportPoW():
+    return None
+
+@pytest.mark.skip(reason="to be filled")
+def test_importPoW():
+    return None
+
+@pytest.mark.skip(reason="to be filled")
+def test_solvePoW():
+    return None
+
+@pytest.mark.skip(reason="to be filled")
+def test_checkPoW():
+    return None
+
+@pytest.mark.skip(reason="to merge with other tests")
 def test_PoW():
     M = 64
     x = 32
