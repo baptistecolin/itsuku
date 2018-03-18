@@ -315,7 +315,7 @@ def test_get_provided_indexes():
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
             round_L = build_rL(i, X, P, n)
 
-            indexes = provided_indexes(round_L, P, T, n)
+            indexes = get_provided_indexes(round_L, T, l, n)
 
             for index in indexes:
                 assert index < T
@@ -368,7 +368,7 @@ def test_build_rZ():
 
             # A shift has to be applied so the indexes match those of the
             # Merkle Tree and not those of X.
-            indexes = [ index + T - 1 for index in  provided_indexes(round_L, P, T, n)]
+            indexes = [ index + T - 1 for index in get_provided_indexes(round_L, T, l, n)]
 
             for k in Z:
                 assert k not in indexes
@@ -376,7 +376,7 @@ def test_build_rZ():
                 if k >= T-1:
                     assert Z[k] == H( M, X[k-(T-1)]+I )
 
-            assert set(Z.keys()) == set(opening(T, provided_indexes(round_L, P, T, n)))
+            assert set(Z.keys()) == set(opening(T, get_provided_indexes(round_L, T, l, n)))
 
 def clean_Z():
     Z = { 5: b'\x00', 8: b'\xfe', 14: b'\xa4' }
