@@ -320,13 +320,7 @@ def test_get_provided_indexes():
 
                 p = i_j // l
 
-                if i_j % l < n :
-                    # case where the elements of round[i_j] were computed at step (1.a)
-                    for k in range(p*l, p*l+n):
-                        assert k in indexes
-                else :
-                    # case where the elements of round[i_j] were computed at step (1.b)
-
+                if i_j % l >= n :
                     seed = round_L[i_j][0][:4]
 
                     # The seed computed using round_L should be the same seed as the
