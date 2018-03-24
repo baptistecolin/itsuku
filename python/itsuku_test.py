@@ -305,7 +305,7 @@ def test_get_provided_indexes():
             PSI = MT[0]
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
-            round_L = build_rL(i, X, P, n)
+            round_L = build_rL(i, X, l, n)
 
             indexes = get_provided_indexes(round_L, T, l, n)
 
@@ -354,7 +354,7 @@ def test_build_rZ():
             PSI = MT[0]
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
-            round_L = build_rL(i, X, P, n)
+            round_L = build_rL(i, X, l, n)
 
             Z = build_rZ(round_L, MT, P, T, n)
 
