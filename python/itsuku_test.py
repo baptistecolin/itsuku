@@ -350,7 +350,7 @@ def test_build_rZ():
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
             round_L = build_rL(i, X, l, n)
 
-            Z = build_rZ(round_L, MT, P, T, n)
+            Z = build_rZ(round_L, MT, T, l, n)
 
             # A shift has to be applied so the indexes match those of the
             # Merkle Tree and not those of X.
