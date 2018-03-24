@@ -109,14 +109,6 @@ def test_build_X():
                     # asserting the validity of the constructed item
                     assert X[p*l+i] == H(x, hash_input + I)
 
-@pytest.mark.skip(reason="to be filled")
-def test__cmp_MT_leaf():
-    return None
-
-@pytest.mark.skip(reason="to be filled")
-def test__cmp_MT_node():
-    return None
-
 def test_build_MT():
     M = 64
     x = 32
