@@ -70,14 +70,6 @@ def test_int_to_4bytes():
     assert int_to_4bytes(256) == b"\x00\x00\x01\x00"
 
 @pytest.mark.skip(reason="to be filled")
-def test__direct_X_i():
-    return None
-
-@pytest.mark.skip(reason="to be filled")
-def test__indirect_X_i():
-    return None
-
-@pytest.mark.skip(reason="to be filled")
 def test_compute_X_i():
     return None
 
