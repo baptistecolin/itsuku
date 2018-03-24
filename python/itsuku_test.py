@@ -269,23 +269,15 @@ def test_build_rL():
             N = os.urandom(32) # nounce
             Y, OMEGA, i = compute_Y(I, X, T, L, S, N, PSI)
 
-            round_L = build_rL(i, X, P, n)
+            round_L = build_rL(i, X, l, n)
+            
+            print([(a, len(round_L[a])) for a in round_L])
 
             for i_j in i:
-                assert len(round_L[i_j]) == n
+                assert len(round_L[i_j]) <= n
                 p = i_j // l
                 if i_j % l < n:
-                    # assert correct construction
-                    assert round_L[i_j] == X[p*l:p*l+n]
-
-                    # by construct, X[i_j] should be part of round_L[i_j]
-                    assert X[i_j] in round_L[i_j]
-
-                    # assert that the elements of round_L are actually computable
-                    for k in range(0,n):
-                        stuff_to_hash = int_to_4bytes(k) + int_to_4bytes(p) + I
-                        assert round_L[i_j][k] == H(x, stuff_to_hash)
-
+                    assert round_L[i_j] == []
                 else:
                     seed = X[i_j-1][:4]
                     # assert correct construction
@@ -295,7 +287,7 @@ def test_build_rL():
                     hash_input = b""
                     for item in round_L[i_j]:
                         hash_input += item
-                    assert H(x,hash_input) == X[i_j]
+                    assert H(x, hash_input + I) == X[i_j]
 
 def test_get_provided_indexes():
     M = 64
