@@ -1,3 +1,5 @@
+This repository hosts an implementation of the Istuku proof-of-work scheme, as described in the following paper : [https://eprint.iacr.org/2017/1168.pdf](https://eprint.iacr.org/2017/1168.pdf)
+
 ## Dependencies
 
 ```bash
