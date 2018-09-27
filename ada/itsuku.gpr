@@ -1,0 +1,7 @@
+project My_Project is
+   package Builder is
+	   for Global_Configuration_Pragmas use "spark_mode.adc";
+   end Builder;
+
+   for Source_Dirs use (".");
+end My_Project;
