@@ -2,7 +2,6 @@ with System.Storage_Elements;
 with Custom_Types; use Custom_Types;
 
 package Phis is
-   type Index is new Natural;
    subtype Phi_Seed is Byte_Array (1 .. 4);
 
    function Phi ( Seed : Phi_Seed;

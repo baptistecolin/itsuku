@@ -10,10 +10,15 @@ package body Phis is
 
    function Phi ( Seed : Phi_Seed;
                   I : Index)
+      -- this implementation of the Phi function comes from
+      -- hhtps://www.cryptolux.org/images/0/0d/Argon2.pdf (page 7)
    return Index is
       R : Index := I-1;
+      J : Index := Seed_To_Int ( Seed );
+      X : Index := (J**2) / (2**32);
+      Y : Index := (R*X) / (2**32);
    begin
-      return I-1; -- TODO : write actual body
+      return R - Y;
    end;
 
 end Phis;
