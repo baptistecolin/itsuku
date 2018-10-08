@@ -2,6 +2,7 @@ with System.Storage_Elements;
 
 package Phis is
    type Index is new Natural;
+   subtype Phi_Seed is System.Storage_Elements.Storage_Array (1 .. 4);
 
    function Phi ( Seed : System.Storage_Elements.Storage_Array;
                   I : Index ) 
